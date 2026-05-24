@@ -1,0 +1,38 @@
+.topbar {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+
+  .title {
+    font-weight: 600;
+  }
+
+  .lang-picker {
+    width: 320px;
+
+    .iso {
+      opacity: 0.7;
+      font-size: 0.85em;
+      margin-left: 0.4rem;
+    }
+    .country {
+      float: right;
+      opacity: 0.6;
+      font-size: 0.8em;
+    }
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  mat-form-field {
+    padding-top: 1.25rem;
+  }
+}
+
+.page {
+  padding: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}

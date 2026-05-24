@@ -1,0 +1,48 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Live Transcribe</mat-card-title>
+    <mat-card-subtitle>
+      {{ state.selectedLang()?.name }} ({{ state.selectedIso() }}) → {{ state.target() | uppercase }}
+    </mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="controls">
+      <button mat-flat-button color="primary" (click)="toggle()">
+        @if (recording()) {
+          <mat-icon>stop</mat-icon> Stop
+        } @else {
+          <mat-icon>mic</mat-icon> Record
+        }
+      </button>
+      <span class="status">
+        @if (recording()) { Recording… 4-second chunks } @else { Idle }
+      </span>
+    </div>
+
+    @if (recording()) {
+      <mat-progress-bar mode="determinate" [value]="level() * 200"></mat-progress-bar>
+    }
+
+    @if (error()) { <p class="error">{{ error() }}</p> }
+
+    @if (rows().length === 0 && !recording()) {
+      <p><em>Press Record to start.</em></p>
+    }
+
+    <div class="rows">
+      @for (row of rows(); track $index) {
+        <div class="row">
+          <div class="ts">{{ row.ts }}</div>
+          <div class="text">
+            <div class="transcript">{{ row.transcript }}</div>
+            @if (row.covered) {
+              <div class="translation">{{ row.translation }}</div>
+            } @else {
+              <div class="translation no-mt">(no translation: {{ row.engine }})</div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>

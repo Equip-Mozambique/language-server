@@ -1,0 +1,34 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Text-to-Speech</mat-card-title>
+    <mat-card-subtitle>
+      Language: {{ state.selectedLang()?.name }} ({{ state.selectedIso() }})
+      @if (!state.selectedLang()?.mms_tts) {
+        — <strong>no MMS-TTS model</strong>
+      }
+    </mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <mat-form-field appearance="outline" class="text-area">
+      <mat-label>Text</mat-label>
+      <textarea matInput rows="6" [ngModel]="text()" (ngModelChange)="text.set($event)"></textarea>
+    </mat-form-field>
+
+    <div class="actions">
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="speak()"
+        [disabled]="loading() || !text().trim() || !state.selectedLang()?.mms_tts">
+        Speak
+      </button>
+      @if (loading()) { <span>Synthesising…</span> }
+      @if (error()) { <span class="error">{{ error() }}</span> }
+    </div>
+
+    @if (audioUrl(); as url) {
+      <audio [src]="url" controls class="player"></audio>
+      <p><a [href]="url" download="tts.wav">Download WAV</a></p>
+    }
+  </mat-card-content>
+</mat-card>

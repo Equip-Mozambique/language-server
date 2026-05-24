@@ -1,0 +1,32 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Transcribe a file</mat-card-title>
+    <mat-card-subtitle>
+      Source: {{ state.selectedLang()?.name }} ({{ state.selectedIso() }}) → {{ state.target() | uppercase }}
+    </mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <input type="file" accept="audio/*" (change)="onFile($event)" />
+    @if (file(); as f) { <p>{{ f.name }} ({{ f.size | number }} bytes)</p> }
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="!file() || loading()"
+      (click)="transcribe()">
+      Transcribe
+    </button>
+    @if (loading()) { <mat-progress-bar mode="indeterminate" /> }
+    @if (error()) { <p class="error">{{ error() }}</p> }
+    @if (result(); as r) {
+      <h3>Transcript</h3>
+      <pre>{{ r.transcript }}</pre>
+      <h3>Translation ({{ r.target | uppercase }})</h3>
+      @if (r.covered) {
+        <pre>{{ r.translation }}</pre>
+        <p><small>engine: {{ r.engine }}</small></p>
+      } @else {
+        <p><em>No MT coverage for {{ r.lang }} → {{ r.target }} (engine: {{ r.engine }}).</em></p>
+      }
+    }
+  </mat-card-content>
+</mat-card>

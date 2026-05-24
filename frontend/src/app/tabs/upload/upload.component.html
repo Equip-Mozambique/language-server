@@ -1,0 +1,67 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Upload to corpus</mat-card-title>
+    <mat-card-subtitle>
+      Target: {{ state.selectedLang()?.name }} ({{ state.selectedIso() }})
+    </mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <input type="file" accept="audio/*,.txt,.srt,.vtt" (change)="onFile($event)" />
+    @if (file(); as f) {
+      <p>{{ f.name }} ({{ f.size | number }} bytes, {{ f.type }})</p>
+    }
+
+    <div class="grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Speaker ID</mat-label>
+        <input matInput [ngModel]="form().speaker_id" (ngModelChange)="patch('speaker_id', $event)" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Dialect</mat-label>
+        <input matInput [ngModel]="form().dialect" (ngModelChange)="patch('dialect', $event)" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Register</mat-label>
+        <mat-select [ngModel]="form().register" (ngModelChange)="patch('register', $event)">
+          @for (r of registers; track r) {
+            <mat-option [value]="r">{{ r }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>License</mat-label>
+        <mat-select [ngModel]="form().license" (ngModelChange)="patch('license', $event)">
+          @for (l of licenses; track l) {
+            <mat-option [value]="l">{{ l }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Transcript (optional)</mat-label>
+      <textarea
+        matInput rows="4"
+        [ngModel]="form().transcript"
+        (ngModelChange)="patch('transcript', $event)"></textarea>
+    </mat-form-field>
+
+    <div class="actions">
+      <button
+        mat-flat-button
+        color="primary"
+        [disabled]="!file() || loading()"
+        (click)="submit()">
+        Upload
+      </button>
+      @if (loading()) { <mat-progress-bar mode="indeterminate" /> }
+      @if (error()) { <span class="error">{{ error() }}</span> }
+      @if (ok(); as r) {
+        <span class="ok">Stored as <code>{{ r.uuid.slice(0, 8) }}…</code> (sha256 {{ r.sha256.slice(0, 12) }}…)</span>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>

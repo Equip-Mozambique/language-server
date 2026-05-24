@@ -1,0 +1,50 @@
+<mat-toolbar color="primary" class="topbar">
+  <span class="title">ai-server</span>
+
+  <mat-form-field appearance="outline" class="lang-picker">
+    <mat-label>Language</mat-label>
+    <mat-select [value]="state.selectedIso()" (selectionChange)="state.setLang($event.value)">
+      @for (lang of state.languages(); track lang.iso) {
+        <mat-option [value]="lang.iso">
+          {{ lang.name }} <span class="iso">({{ lang.iso }})</span>
+          <span class="country">{{ lang.country }}</span>
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-button-toggle-group [value]="state.target()" (change)="setTarget($event.value)">
+    <mat-button-toggle value="en">EN</mat-button-toggle>
+    <mat-button-toggle value="pt">PT</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <span class="spacer"></span>
+
+  @if (state.selectedLang(); as lang) {
+    <mat-chip-set>
+      <mat-chip [color]="lang.whisper_code ? 'primary' : ''">
+        Whisper: {{ lang.whisper_code ?? '—' }}
+      </mat-chip>
+      <mat-chip [color]="lang.mms_iso ? 'primary' : ''">
+        MMS-ASR: {{ lang.mms_iso ?? '—' }}
+      </mat-chip>
+      <mat-chip [color]="lang.mms_tts ? 'primary' : ''">
+        MMS-TTS: {{ lang.mms_tts ?? '—' }}
+      </mat-chip>
+      <mat-chip>{{ lang.status }}</mat-chip>
+    </mat-chip-set>
+  }
+</mat-toolbar>
+
+<nav mat-tab-nav-bar [tabPanel]="tabPanel">
+  <a mat-tab-link routerLink="/live" routerLinkActive #live="routerLinkActive" [active]="live.isActive">Live Transcribe</a>
+  <a mat-tab-link routerLink="/file" routerLinkActive #file="routerLinkActive" [active]="file.isActive">Transcribe File</a>
+  <a mat-tab-link routerLink="/tts" routerLinkActive #tts="routerLinkActive" [active]="tts.isActive">TTS</a>
+  <a mat-tab-link routerLink="/resources" routerLinkActive #res="routerLinkActive" [active]="res.isActive">Resources</a>
+  <a mat-tab-link routerLink="/upload" routerLinkActive #up="routerLinkActive" [active]="up.isActive">Upload</a>
+</nav>
+<mat-tab-nav-panel #tabPanel>
+  <main class="page">
+    <router-outlet />
+  </main>
+</mat-tab-nav-panel>
