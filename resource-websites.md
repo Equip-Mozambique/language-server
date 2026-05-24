@@ -363,3 +363,89 @@ progress.bible blocked Cloudflare. Status assembled from worldbibles.org, find.b
 - **Portions only:** nmq, ndc, chw
 
 **Implication:** Most target langs HAVE text Bibles publicly published — just need to find downloadable USFM/HTML versions for alignment with our 350h audio corpus. `bible.com` YouVersion versions are the most accessible (per-verse JSON via reverse-engineering API).
+
+---
+
+## 3rd-degree crawl (2026-05-24, post-unlock)
+
+Once `aiserver.scrape` (curl_cffi + wayback) unlocked the previously-blocked
+8 sites, re-ran outbound-link crawl. Saved JSON: `data/crawl_unlocked.json`.
+
+**Total new domains found: 152**. Most relevant 24 Christian/Bible-keyword matches:
+
+| URL | Found via |
+|---|---|
+| https://aboutbible.net | dbs.org |
+| https://bible.org | dbs.org |
+| https://biblelessonsintl.com | dbs.org |
+| https://bibletranslators.org | dbs.org |
+| https://biblevisuals.org | dbs.org |
+| https://ccbiblestudy.org | dbs.org |
+| https://chinachristianbooks.com | dbs.org |
+| https://christianaidministries.org | dbs.org |
+| https://e-bible.net | dbs.org |
+| https://gichurch.org | dbs.org |
+| https://gospel.com | dbs.org |
+| https://gospelcomics.com | dbs.org |
+| https://i.bible | dbs.org |
+| https://missionindia.org | dbs.org |
+| https://openscriptures.org | dbs.org |
+| https://pngscriptures.org | dbs.org |
+| https://schoolofchrist.tv | dbs.org |
+| https://schoolofchristintl.com | dbs.org |
+| https://sermonaudio.com | tbsbibles.org |
+| https://voiceofchristmedia.org | dbs.org |
+| https://worldchristian.org | dbs.org |
+| https://worldmission.cc | dbs.org |
+| https://wwbible.org | dbs.org |
+| https://bibletranslators.org | dbs.org (note: distinct from wycliffe.org Bible Translators) |
+
+**152 total** new domains (incl. non-Bible-keyword orgs like `doorinternational.com`,
+`createinternational.com`, `frontiers.*`, region-specific Bible ministries, etc.).
+Full list in `data/crawl_unlocked.json`.
+
+---
+
+## DBS Audio Catalog (NEW — direct API access via `audio.dbs.org/index.json`)
+
+**Discovery:** DBS hosts a public JSON catalog at `https://audio.dbs.org/index.json`
+with 431 audio Bibles across 389 ISO codes. Scoped by Full Bible / NT / OT / Portion.
+
+Parsed via `scripts/dbs_parse.py`. Saved: `data/research/dbs/index.json`.
+
+### Target language coverage in DBS audio (5 hits — full Bibles!)
+
+| ISO | Lang | DBS abbr | Title | Scope | Pub year |
+|---|---|---|---|---|---|
+| **nde** | Ndebele (N./ZW) | NDEBIB | Biblica Open Ndebele Contemporary Bible | **Full Bible** | 2023 Biblica/Davar |
+| **nya** | Chichewa | NYABSMW.00333 / NYABSMW04605 | Nyanja-Chewa Bible (MW) / Buku Lopatulika (ZM) | **Full Bible** (×2) | 2023 / 2015 Davar |
+| **toi** | Tonga (ZM) | TOIBSZAM | Bbaibele 2020 | **Full Bible** | 2020 Davar |
+| **ndc** | Ndau | NDCBSZ | Chindau New Bible — Bhaibheri Rakachena muChindau | **Full Bible** | 2014 Davar |
+| **yao** | Yao | YAOBSMW | chi-Yao Buku Jeswela | **Full Bible** | 2015 Davar |
+
+**These are FULL Bibles (OT+NT) — much bigger than FCBH/DBP NT-only filesets.**
+
+### Bantu adjacents in DBS (for cross-lingual transfer)
+
+- **kde** Makonde — KDEWBT (Mozambique)
+- **mgh** Makua (Makhuwa-Meetto) — MGHWFW (Mozambique)
+- **swh** Swahili — SWHSUVBST
+- **kuj** Igikuria — KUJBSK
+- **suk** Sukuma — SUKBST
+- **run** Kirundi — RUNBSB2018, plus another
+- **luo** Dholuo — LUOBIB
+- **kik** Gikuyu — KIKBSK
+- **kam** KiKamba — KAMBSK
+- **gax** Borana — GAXBSK
+- **nyf** Giryama — NYFBTL
+- **jmc** Kimashami — JMCBST
+- **kdc** Kutu — KDCWFW
+
+### What this changes
+
+**Major upgrade for ndc / nde / toi / yao / nya.** Currently we have FCBH NT only for these.
+DBS has the **full OT+NT** for each → 3-4× more audio per language. Need to find
+download URLs from `audio.dbs.org/<abbr>/...` and add to bulk downloader.
+
+Action: extend `dbp_download.py` (or add `dbs_download.py`) to fetch DBS audio
+for the 5 newly-discovered full Bibles + Bantu adjacents.

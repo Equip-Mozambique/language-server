@@ -272,12 +272,17 @@ Translation timeline: NT work 1919–2000; first full Bible reportedly 2009; cur
 
 **Risk / data caveat:** All public audio is religious read-speech. BSB NT recording is BW-Lilima variant — Zim-side TjiKalanga speakers may show register drift. KBTP (Zim project) producing newer text but no aligned audio yet. Tone marking inconsistent across orthographies — affects TTS training. Plan eval set with minimal-pair tone contrasts.
 
-## License Caveat
+## License Caveat (RESOLVED 2026-05-24)
 
-**MMS = CC-BY-NC 4.0 (non-commercial only).** Options:
-- Non-commercial / NGO / research / civic use → MMS OK
-- Commercial → fine-tune w2v-BERT 2.0 (MIT) from scratch OR train VITS-from-scratch via `ylacombe/finetune-hf-vits`
-- Negotiate license with Meta
+**This is a non-commercial Equip Mozambique (NGO) project.** See `CLAUDE.md`.
+
+- MMS / MMS-TTS / SeamlessM4T (CC-BY-NC 4.0) → use directly
+- FCBH / Bible.is / DBP audio → use under non-commercial research terms
+- Coqui XTTS-v2 (CPML) → use directly
+- DSFSI ZA-African-Next-Voices → ASR fine; TTS still prohibited per dataset license
+
+The "commercial fallback" plan (w2v-BERT-from-scratch, VITS-from-scratch) is
+**not needed**. Disregard.
 
 ## Sources
 

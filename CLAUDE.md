@@ -2,6 +2,24 @@
 
 Remote GPU box for running LLMs / audio AI workloads.
 
+## Project Use
+
+**NON-COMMERCIAL PROJECT.** Operated by Equip Mozambique (NGO). All work here —
+model use, dataset use, fine-tuning, derived weights, deployments — is for
+non-commercial research, mission, and civic-good purposes only.
+
+This unlocks:
+- **MMS / MMS-TTS** (CC-BY-NC 4.0) — usable directly without licensing negotiation
+- **FCBH / Bible.is / DBP audio** — usable under FCBH research/mission terms
+- **SeamlessM4T v2** (CC-BY-NC) — usable directly
+- **Coqui XTTS-v2** (CPML non-commercial) — usable directly
+- **StoryRunners storysets** — usable for non-commercial research
+- **DSFSI ZA-African-Next-Voices** — TTS prohibited regardless; ASR fine for research
+- **NCHLT / SADILaR** (CC-BY 3.0) — already commercially-permissive
+
+No need to plan a w2v-BERT-from-scratch / VITS-from-scratch alternative.
+Disregard "commercial fallback" notes in earlier research; they don't apply.
+
 ## Connection
 
 Server reachable via **Tailscale** (preferred) or public DNS.

@@ -57,14 +57,22 @@ but could be useful for cross-lingual transfer learning:
 
 ## License & redistribution
 
-DBP/FCBH content: **free for non-commercial research/mission use**. Audio is
-copyright FCBH or partner Bible Societies; downloads via DBP API are licensed
-for the consumer app or research project specified at key registration.
+**Project is non-commercial (Equip Mozambique NGO). See `CLAUDE.md`.**
 
-Cannot legally redistribute the audio files themselves, but **transcripts** are
-public domain (Bible text) and **derived models** (fine-tuned ASR weights) are
-generally OK as long as the original audio is not redistributed. Confirm w/ FCBH
-licensing if intent is commercial deployment.
+- **DBP/FCBH audio:** usable under FCBH non-commercial research/mission terms.
+  Cannot redistribute raw audio files; **derived models** (fine-tuned ASR/TTS
+  weights) OK to publish under same non-commercial terms.
+- **Bible text transcripts:** public domain (KJV/ASV) or copyrighted to Bible
+  Societies — verify per-version before redistributing transcripts. Most modern
+  vernacular translations are © Bible Society of the country.
+- **MMS / MMS-TTS** (CC-BY-NC 4.0): use directly. Derived weights stay CC-BY-NC.
+- **DSFSI Next-Voices**: ASR fine; **TTS prohibited per dataset license** even
+  for non-commercial. Do not train TTS on this corpus.
+- **NCHLT / SADILaR** (CC-BY 3.0): fully permissive (incl. commercial); no
+  constraints.
+
+No need to plan commercial-license alternatives — non-commercial path covers
+everything.
 
 ## Download priorities (next step)
 
