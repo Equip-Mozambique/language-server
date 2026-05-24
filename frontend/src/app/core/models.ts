@@ -43,6 +43,24 @@ export interface UploadRow {
   sha256: string;
 }
 
+export interface DbpFileset {
+  id: string;
+  label: string;
+  type: string;
+  scope: string;
+  bitrate: string | null;
+  asset_id: string | null;
+  codec: string | null;
+}
+
+export interface DbpBible {
+  id: string;
+  name: string;
+  name_vernacular: string;
+  scope: string;
+  filesets: DbpFileset[];
+}
+
 export interface ResourceBundle {
   iso: string;
   name: string;
@@ -54,6 +72,7 @@ export interface ResourceBundle {
     preferred_stt: string;
     preferred_tts: string;
     proxy_iso: string | null;
+    nllb: boolean;
   };
   research_md: string;
   dbs_bibles: Array<{
@@ -65,6 +84,7 @@ export interface ResourceBundle {
     cn?: string;
     ln?: string;
   }>;
+  dbp_bibles: DbpBible[];
   uploads: UploadRow[];
   uploads_count: number;
 }

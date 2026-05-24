@@ -1,5 +1,5 @@
 <div class="page">
-  @if (loading()) {
+  @if (loading() && !bundle()) {
     <p class="text-muted">Loading…</p>
   }
   @if (error()) {
@@ -12,109 +12,243 @@
   @if (bundle(); as b) {
     <div class="page-header">
       <div class="titles">
-        <h1>{{ b.name }} <small style="font-family: var(--font-sans); font-size: 14px; color: var(--muted)">({{ b.iso }} — {{ b.country }})</small></h1>
-        <div class="sub">Resources, references, and uploaded corpus.</div>
+        <h1>
+          {{ b.name }}
+          <span class="mono text-muted" style="font-family: var(--font-mono); font-size: 17px; font-weight: 400">· {{ b.iso }}</span>
+        </h1>
+        <div class="sub">Reference data, research notes, and corpus for this language.</div>
+      </div>
+      <div class="actions">
+        <span class="pill"><span class="dot {{ statusClass() }}"></span>{{ statusLabel() }}</span>
+        <span class="chip outline mono">{{ b.country }}</span>
       </div>
     </div>
 
-    <section class="card">
-      <header class="card-head">
-        <h2><app-icon name="layers"></app-icon> Model coverage</h2>
-        <span class="pill">
-          <span class="dot {{ b.model_coverage.mms_iso ? 'green' : (b.model_coverage.proxy_iso ? 'amber' : 'red') }}"></span>
-          {{ b.model_coverage.mms_iso ? 'Native' : (b.model_coverage.proxy_iso ? 'Proxy' : 'Missing') }}
-        </span>
-      </header>
-      <div class="card-body row gap-2" style="flex-wrap: wrap;">
-        <span class="chip">STT: {{ b.model_coverage.preferred_stt }}</span>
-        <span class="chip">TTS: {{ b.model_coverage.preferred_tts }}</span>
-        <span class="chip" [class.green]="b.model_coverage.whisper_code">Whisper: {{ b.model_coverage.whisper_code ?? '—' }}</span>
-        <span class="chip" [class.green]="b.model_coverage.mms_iso">MMS-ASR: {{ b.model_coverage.mms_iso ?? '—' }}</span>
-        <span class="chip" [class.green]="b.model_coverage.mms_tts">MMS-TTS: {{ b.model_coverage.mms_tts ?? '—' }}</span>
-        @if (b.model_coverage.proxy_iso) {
-          <span class="chip amber">Proxy → {{ b.model_coverage.proxy_iso }}</span>
-        }
-      </div>
-    </section>
-
-    @if (b.research_md) {
-      <section class="card mt-4">
-        <header class="card-head">
-          <h2><app-icon name="book"></app-icon> Research deep-dive</h2>
-        </header>
-        <div class="card-body">
-          <div class="md">
-            <markdown [data]="b.research_md"></markdown>
+    <div class="res-grid">
+      <div class="col gap-4">
+        <!-- 1. Model coverage -->
+        <section id="coverage" class="card">
+          <header class="card-head">
+            <h2><app-icon name="layers"></app-icon> Model coverage</h2>
+            <span class="pill"><span class="dot {{ statusClass() }}"></span>{{ statusLabel() }}</span>
+          </header>
+          <div class="card-body row gap-3" style="flex-wrap: wrap;">
+            <div class="cov-badge">
+              <span class="pill"><span class="dot {{ coverageTone(b.model_coverage.whisper_code, false) }}"></span>Whisper</span>
+              <span class="text-xs text-muted">{{ coverageLabel(b.model_coverage.whisper_code, false) }}</span>
+            </div>
+            <div class="cov-badge">
+              <span class="pill"><span class="dot {{ coverageTone(b.model_coverage.mms_iso, !!b.model_coverage.proxy_iso) }}"></span>MMS-ASR</span>
+              <span class="text-xs text-muted">{{ coverageLabel(b.model_coverage.mms_iso, !!b.model_coverage.proxy_iso) }}</span>
+            </div>
+            <div class="cov-badge">
+              <span class="pill"><span class="dot {{ coverageTone(b.model_coverage.mms_tts, !!b.model_coverage.proxy_iso) }}"></span>MMS-TTS</span>
+              <span class="text-xs text-muted">{{ coverageLabel(b.model_coverage.mms_tts, !!b.model_coverage.proxy_iso) }}</span>
+            </div>
+            <div class="cov-badge">
+              <span class="pill"><span class="dot {{ coverageTone(b.model_coverage.nllb, false) }}"></span>NLLB</span>
+              <span class="text-xs text-muted">{{ coverageLabel(b.model_coverage.nllb, false) }}</span>
+            </div>
+            @if (b.model_coverage.proxy_iso) {
+              <div class="proxy-callout">
+                <app-icon name="link"></app-icon>
+                Proxies to <strong>{{ b.model_coverage.proxy_iso }}</strong>
+              </div>
+            }
           </div>
-        </div>
-      </section>
-    }
+        </section>
 
-    <section class="card mt-4">
-      <header class="card-head">
-        <h2><app-icon name="database"></app-icon> DBS Bible catalog</h2>
-        <span class="chip mono">{{ b.dbs_bibles.length }}</span>
-      </header>
-      <div class="card-body">
-        @if (b.dbs_bibles.length === 0) {
-          <div class="state">
-            <div class="icon"><app-icon name="inbox" [size]="20"></app-icon></div>
-            <h3>No catalog entries</h3>
-          </div>
-        } @else {
-          <table class="table">
-            <thead>
-              <tr><th>ID</th><th>Title</th><th>Vernacular</th><th>Year</th><th>Country</th></tr>
-            </thead>
-            <tbody>
-              @for (r of b.dbs_bibles; track r.id) {
-                <tr>
-                  <td><code class="mono">{{ r.id }}</code></td>
-                  <td>{{ r.tt }}</td>
-                  <td>{{ r.tv }}</td>
-                  <td>{{ r.dt }}</td>
-                  <td>{{ r.cn }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
+        <!-- 2. Research deep-dive -->
+        @if (b.research_md) {
+          <section id="research" class="card">
+            <header class="card-head">
+              <h2><app-icon name="book"></app-icon> Research notes</h2>
+            </header>
+            <div class="card-body">
+              <div class="md">
+                <markdown [data]="b.research_md"></markdown>
+              </div>
+            </div>
+          </section>
         }
-      </div>
-    </section>
 
-    <section class="card mt-4">
-      <header class="card-head">
-        <h2><app-icon name="file_audio"></app-icon> Uploaded corpus</h2>
-        <span class="chip mono">{{ b.uploads_count }}</span>
-      </header>
-      <div class="card-body">
-        @if (b.uploads_count === 0) {
-          <div class="state">
-            <div class="icon"><app-icon name="inbox" [size]="20"></app-icon></div>
-            <h3>No uploads yet</h3>
-            <p>Use the Upload tab to add training data for this language.</p>
+        <!-- 3. DBS Bible catalog -->
+        <section id="catalog" class="card">
+          <header class="card-head">
+            <h2><app-icon name="hash"></app-icon> DBS Bible catalog</h2>
+            <span class="chip mono">{{ b.dbs_bibles.length }} {{ b.dbs_bibles.length === 1 ? 'entry' : 'entries' }}</span>
+          </header>
+          <div class="card-body">
+            @if (b.dbs_bibles.length === 0) {
+              <div class="state">
+                <div class="icon"><app-icon name="hash" [size]="20"></app-icon></div>
+                <h3>No catalog entries</h3>
+                <p>No Digital Bible Society records found for this language.</p>
+              </div>
+            } @else {
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th class="sortable" (click)="sortBy('id')">ID</th>
+                    <th class="sortable" (click)="sortBy('tt')">Title (EN)</th>
+                    <th>Vernacular title</th>
+                    <th class="sortable num" (click)="sortBy('dt')">Year</th>
+                    <th>Country</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (r of catalogSorted(); track r.id) {
+                    <tr>
+                      <td><span class="chip mono outline">{{ r.id }}</span></td>
+                      <td>{{ r.tt }}</td>
+                      <td style="font-family: var(--font-serif); font-style: italic; color: var(--text-2)">{{ r.tv }}</td>
+                      <td class="num">{{ r.dt }}</td>
+                      <td><span class="chip outline mono">{{ r.cn }}</span></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
           </div>
-        } @else {
-          <table class="table">
-            <thead>
-              <tr><th>UUID</th><th>Filename</th><th>Speaker</th><th>Dialect</th><th>Register</th><th>License</th><th>Uploaded</th></tr>
-            </thead>
-            <tbody>
-              @for (u of b.uploads; track u.uuid) {
-                <tr>
-                  <td><code class="mono">{{ u.uuid.slice(0, 8) }}…</code></td>
-                  <td>{{ u.filename_orig }}</td>
-                  <td>{{ u.speaker_id }}</td>
-                  <td>{{ u.dialect }}</td>
-                  <td><span class="chip outline">{{ u.register }}</span></td>
-                  <td><span class="chip outline">{{ u.license }}</span></td>
-                  <td>{{ u.uploaded_at | slice:0:19 }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        }
+        </section>
+
+        <!-- 4. DBP audio Bible inventory -->
+        <section id="audio" class="card">
+          <header class="card-head">
+            <h2><app-icon name="speaker"></app-icon> DBP audio Bible inventory</h2>
+            <span class="chip mono">{{ b.dbp_bibles.length }} {{ b.dbp_bibles.length === 1 ? 'bible' : 'bibles' }}</span>
+          </header>
+          <div class="card-body">
+            @if (b.dbp_bibles.length === 0) {
+              <div class="state">
+                <div class="icon"><app-icon name="speaker" [size]="20"></app-icon></div>
+                <h3>No audio Bibles</h3>
+                <p>DBP has no audio inventory for this language (or DBP_API_KEY is unset on the server).</p>
+              </div>
+            } @else {
+              <div class="col gap-3">
+                @for (dbp of b.dbp_bibles; track dbp.id) {
+                  <div class="audio-bible">
+                    <div class="ab-head">
+                      <span class="chip mono outline">{{ dbp.id }}</span>
+                      <strong>{{ dbp.name }}</strong>
+                      <span class="chip accent">{{ dbp.scope }}</span>
+                      <span style="margin-left: auto; font-size: 12px; color: var(--muted)">
+                        {{ dbp.filesets.length }} fileset{{ dbp.filesets.length === 1 ? '' : 's' }}
+                      </span>
+                    </div>
+                    @for (fs of dbp.filesets; track fs.id) {
+                      <div class="ab-row">
+                        <div>
+                          <div style="font-size: 13px; font-weight: 500">{{ fs.label }}</div>
+                          <div class="text-xs text-muted">
+                            <code class="mono">{{ fs.id }}</code>
+                            @if (fs.codec) { · {{ fs.codec }} }
+                          </div>
+                        </div>
+                        <span class="chip outline">not downloaded</span>
+                        <button class="btn sm primary" disabled>
+                          <app-icon name="download"></app-icon> Download
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </section>
+
+        <!-- 5. Uploaded corpus -->
+        <section id="corpus" class="card">
+          <header class="card-head">
+            <h2><app-icon name="database"></app-icon> Uploaded corpus</h2>
+            <span class="chip mono">{{ corpusFiltered().length }} of {{ b.uploads_count }}</span>
+          </header>
+          <div class="card-body">
+            @if (b.uploads_count === 0) {
+              <div class="state">
+                <div class="icon"><app-icon name="database" [size]="20"></app-icon></div>
+                <h3>No uploads yet</h3>
+                <p>Add training data in the Upload tab. Audio, transcripts, and subtitle files all accepted.</p>
+              </div>
+            } @else {
+              <div class="row gap-2 mb-4" style="flex-wrap: wrap;">
+                <span class="text-xs text-muted" style="margin-right: 4px;">
+                  <app-icon name="filter"></app-icon> Register:
+                </span>
+                @for (r of registers; track r) {
+                  <button
+                    class="chip"
+                    [class.accent]="filterRegister() === r"
+                    [class.outline]="filterRegister() !== r"
+                    style="cursor: pointer"
+                    (click)="toggleRegister(r)">{{ r }}</button>
+                }
+                <span style="width: 1px; height: 16px; background: var(--border); margin: 0 6px;"></span>
+                <span class="text-xs text-muted" style="margin-right: 4px;">License:</span>
+                @for (l of licenses; track l) {
+                  <button
+                    class="chip"
+                    [class.accent]="filterLicense() === l"
+                    [class.outline]="filterLicense() !== l"
+                    style="cursor: pointer"
+                    (click)="toggleLicense(l)">{{ l }}</button>
+                }
+              </div>
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>Filename</th>
+                    <th>Speaker</th>
+                    <th>Dialect</th>
+                    <th>Register</th>
+                    <th>License</th>
+                    <th>Uploaded</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (u of corpusFiltered(); track u.uuid) {
+                    <tr>
+                      <td><span class="mono text-sm" style="font-family: var(--font-mono); font-size: 12px">{{ u.filename_orig || u.uuid.slice(0,8) + '…' }}</span></td>
+                      <td>@if (u.speaker_id) { <span class="chip mono outline">{{ u.speaker_id }}</span> }</td>
+                      <td>{{ u.dialect }}</td>
+                      <td>@if (u.register) { <span class="chip">{{ u.register }}</span> }</td>
+                      <td>@if (u.license) { <span class="chip outline">{{ u.license }}</span> }</td>
+                      <td class="text-muted text-sm">{{ u.uploaded_at | slice:0:10 }}</td>
+                      <td class="actions">
+                        <button class="icon-btn" aria-label="Play"><app-icon name="play"></app-icon></button>
+                      </td>
+                    </tr>
+                  }
+                  @if (corpusFiltered().length === 0) {
+                    <tr><td colspan="7">
+                      <div class="state">
+                        <div class="icon"><app-icon name="filter" [size]="20"></app-icon></div>
+                        <h3>No matches</h3>
+                        <p>Adjust your filters.</p>
+                      </div>
+                    </td></tr>
+                  }
+                </tbody>
+              </table>
+            }
+          </div>
+        </section>
       </div>
-    </section>
+
+      <!-- Sticky TOC -->
+      <aside class="res-toc">
+        <h4><app-icon name="toc"></app-icon> On this page</h4>
+        <ol>
+          <li><a href="#coverage">Model coverage</a></li>
+          @if (b.research_md) { <li><a href="#research">Research notes</a></li> }
+          <li><a href="#catalog">DBS catalog</a></li>
+          <li><a href="#audio">DBP audio</a></li>
+          <li><a href="#corpus">Uploaded corpus</a></li>
+        </ol>
+      </aside>
+    </div>
   }
 </div>
