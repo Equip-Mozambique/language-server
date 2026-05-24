@@ -95,12 +95,16 @@ def download(iso: str, audio_id: str | None, text_id: str | None) -> None:
 
     text_index: dict[tuple[str, int], str] = {}
     if text_id:
-        verses = dbp.fileset_chapters(text_id, text_asset)
-        for v in verses:
-            key = (v.get("book_id", ""), int(v.get("chapter", 0) or 0))
-            text_index.setdefault(key, "")
-            text_index[key] += " " + (v.get("verse_text") or "").strip()
-        rprint(f"[cyan]Text verses:[/cyan] {len(verses)} → {len(text_index)} chapter blocks")
+        try:
+            verses = dbp.fileset_chapters(text_id, text_asset)
+            for v in verses:
+                key = (v.get("book_id", ""), int(v.get("chapter", 0) or 0))
+                text_index.setdefault(key, "")
+                text_index[key] += " " + (v.get("verse_text") or "").strip()
+            rprint(f"[cyan]Text verses:[/cyan] {len(verses)} → {len(text_index)} chapter blocks")
+        except Exception as e:
+            rprint(f"[yellow]Text fileset {text_id} failed ({e}); continuing audio-only[/yellow]")
+            text_id = None
 
     manifest = []
     with Progress() as prog:

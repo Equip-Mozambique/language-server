@@ -18,3 +18,7 @@ data/audio/*.flac
 !data/samples/
 .DS_Store
 .claude/settings.local.json
+.claude/skills/omlx
+work/
+.venv/
+data/uploads/

@@ -40,6 +40,27 @@ def tts_cmd(text: str, lang: str, out: Path = Path("out.wav")) -> None:
     rprint(f"Wrote [bold]{path}[/bold]")
 
 
+@app.command("serve")
+def serve(
+    host: str = "127.0.0.1",
+    port: int = 8000,
+    preload: bool = True,
+    reload: bool = False,
+) -> None:
+    """Run the FastAPI HTTP server (tailnet-only by default).
+
+    Bind to 100.94.x.x for Tailscale-only exposure. Default 127.0.0.1 is safe for
+    local dev. preload=True warms Whisper + MMS into VRAM on startup.
+    """
+    import os
+
+    import uvicorn
+
+    if preload:
+        os.environ["AISERVER_PRELOAD_MODELS"] = "1"
+    uvicorn.run("aiserver.api.app:app", host=host, port=port, reload=reload)
+
+
 @app.command("gpu")
 def gpu() -> None:
     """Show GPU info."""
