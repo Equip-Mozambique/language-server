@@ -1,24 +1,14 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
+import { IconComponent } from '../../core/icon.component';
 import { ApiService } from '../../core/api.service';
 import { LanguageStateService } from '../../core/language-state.service';
 
 @Component({
   selector: 'app-tts',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatCardModule,
-  ],
+  imports: [CommonModule, FormsModule, IconComponent],
   templateUrl: './tts.component.html',
   styleUrl: './tts.component.scss',
 })
@@ -26,15 +16,24 @@ export class TtsComponent {
   private api = inject(ApiService);
   state = inject(LanguageStateService);
 
-  text = signal('');
+  text = signal('Mhoroi, ndinotenda kuti mauya kuno nhasi.');
   audioUrl = signal<string | null>(null);
   loading = signal(false);
   error = signal<string | null>(null);
 
+  readonly MAX_LEN = 4000;
+
+  hasTts = computed(() => !!this.state.selectedLang()?.mms_tts);
+  proxyLang = computed(() => {
+    const l = this.state.selectedLang();
+    if (!l || l.mms_tts) return null;
+    return l.proxy_iso;
+  });
+
   speak() {
     const t = this.text().trim();
     const lang = this.state.selectedIso();
-    if (!t || !lang) return;
+    if (!t || !lang || !this.hasTts()) return;
     this.loading.set(true);
     this.error.set(null);
     this.api.tts(lang, t).subscribe({
@@ -48,5 +47,10 @@ export class TtsComponent {
         this.loading.set(false);
       },
     });
+  }
+
+  switchToProxy() {
+    const p = this.proxyLang();
+    if (p) this.state.setLang(p);
   }
 }

@@ -1,120 +1,120 @@
-@if (loading()) {
-  <p>Loading…</p>
-}
-@if (error()) {
-  <p class="error">{{ error() }}</p>
-}
-@if (bundle(); as b) {
-  <h2>{{ b.name }} <small>({{ b.iso }} — {{ b.country }})</small></h2>
-
-  <mat-card class="section">
-    <mat-card-header><mat-card-title>Model coverage</mat-card-title></mat-card-header>
-    <mat-card-content>
-      <mat-chip-set>
-        <mat-chip>STT: {{ b.model_coverage.preferred_stt }}</mat-chip>
-        <mat-chip>TTS: {{ b.model_coverage.preferred_tts }}</mat-chip>
-        <mat-chip [color]="b.model_coverage.whisper_code ? 'primary' : ''">
-          Whisper: {{ b.model_coverage.whisper_code ?? '—' }}
-        </mat-chip>
-        <mat-chip [color]="b.model_coverage.mms_iso ? 'primary' : ''">
-          MMS-ASR: {{ b.model_coverage.mms_iso ?? '—' }}
-        </mat-chip>
-        <mat-chip [color]="b.model_coverage.mms_tts ? 'primary' : ''">
-          MMS-TTS: {{ b.model_coverage.mms_tts ?? '—' }}
-        </mat-chip>
-        @if (b.model_coverage.proxy_iso) {
-          <mat-chip color="accent">Proxy: {{ b.model_coverage.proxy_iso }}</mat-chip>
-        }
-      </mat-chip-set>
-    </mat-card-content>
-  </mat-card>
-
-  @if (b.research_md) {
-    <mat-card class="section">
-      <mat-card-header><mat-card-title>RESEARCH.md deep-dive</mat-card-title></mat-card-header>
-      <mat-card-content>
-        <markdown [data]="b.research_md"></markdown>
-      </mat-card-content>
-    </mat-card>
+<div class="page">
+  @if (loading()) {
+    <p class="text-muted">Loading…</p>
   }
+  @if (error()) {
+    <div class="state error">
+      <div class="icon"><app-icon name="alert" [size]="20"></app-icon></div>
+      <h3>Failed to load</h3>
+      <p>{{ error() }}</p>
+    </div>
+  }
+  @if (bundle(); as b) {
+    <div class="page-header">
+      <div class="titles">
+        <h1>{{ b.name }} <small style="font-family: var(--font-sans); font-size: 14px; color: var(--muted)">({{ b.iso }} — {{ b.country }})</small></h1>
+        <div class="sub">Resources, references, and uploaded corpus.</div>
+      </div>
+    </div>
 
-  <mat-card class="section">
-    <mat-card-header>
-      <mat-card-title>DBS Bible catalog ({{ b.dbs_bibles.length }})</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      @if (b.dbs_bibles.length === 0) {
-        <p>(no entries)</p>
-      } @else {
-        <table mat-table [dataSource]="b.dbs_bibles">
-          <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef>ID</th>
-            <td mat-cell *matCellDef="let r">{{ r.id }}</td>
-          </ng-container>
-          <ng-container matColumnDef="tt">
-            <th mat-header-cell *matHeaderCellDef>Title</th>
-            <td mat-cell *matCellDef="let r">{{ r.tt }}</td>
-          </ng-container>
-          <ng-container matColumnDef="tv">
-            <th mat-header-cell *matHeaderCellDef>Vernacular</th>
-            <td mat-cell *matCellDef="let r">{{ r.tv }}</td>
-          </ng-container>
-          <ng-container matColumnDef="dt">
-            <th mat-header-cell *matHeaderCellDef>Year</th>
-            <td mat-cell *matCellDef="let r">{{ r.dt }}</td>
-          </ng-container>
-          <ng-container matColumnDef="cn">
-            <th mat-header-cell *matHeaderCellDef>Country</th>
-            <td mat-cell *matCellDef="let r">{{ r.cn }}</td>
-          </ng-container>
-          <tr mat-header-row *matHeaderRowDef="bibleCols"></tr>
-          <tr mat-row *matRowDef="let row; columns: bibleCols"></tr>
-        </table>
-      }
-    </mat-card-content>
-  </mat-card>
+    <section class="card">
+      <header class="card-head">
+        <h2><app-icon name="layers"></app-icon> Model coverage</h2>
+        <span class="pill">
+          <span class="dot {{ b.model_coverage.mms_iso ? 'green' : (b.model_coverage.proxy_iso ? 'amber' : 'red') }}"></span>
+          {{ b.model_coverage.mms_iso ? 'Native' : (b.model_coverage.proxy_iso ? 'Proxy' : 'Missing') }}
+        </span>
+      </header>
+      <div class="card-body row gap-2" style="flex-wrap: wrap;">
+        <span class="chip">STT: {{ b.model_coverage.preferred_stt }}</span>
+        <span class="chip">TTS: {{ b.model_coverage.preferred_tts }}</span>
+        <span class="chip" [class.green]="b.model_coverage.whisper_code">Whisper: {{ b.model_coverage.whisper_code ?? '—' }}</span>
+        <span class="chip" [class.green]="b.model_coverage.mms_iso">MMS-ASR: {{ b.model_coverage.mms_iso ?? '—' }}</span>
+        <span class="chip" [class.green]="b.model_coverage.mms_tts">MMS-TTS: {{ b.model_coverage.mms_tts ?? '—' }}</span>
+        @if (b.model_coverage.proxy_iso) {
+          <span class="chip amber">Proxy → {{ b.model_coverage.proxy_iso }}</span>
+        }
+      </div>
+    </section>
 
-  <mat-card class="section">
-    <mat-card-header>
-      <mat-card-title>Uploaded corpus ({{ b.uploads_count }})</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      @if (b.uploads_count === 0) {
-        <p>No uploads yet for this language.</p>
-      } @else {
-        <table mat-table [dataSource]="b.uploads">
-          <ng-container matColumnDef="uuid">
-            <th mat-header-cell *matHeaderCellDef>UUID</th>
-            <td mat-cell *matCellDef="let r">{{ r.uuid.slice(0, 8) }}…</td>
-          </ng-container>
-          <ng-container matColumnDef="filename_orig">
-            <th mat-header-cell *matHeaderCellDef>Filename</th>
-            <td mat-cell *matCellDef="let r">{{ r.filename_orig }}</td>
-          </ng-container>
-          <ng-container matColumnDef="speaker_id">
-            <th mat-header-cell *matHeaderCellDef>Speaker</th>
-            <td mat-cell *matCellDef="let r">{{ r.speaker_id }}</td>
-          </ng-container>
-          <ng-container matColumnDef="dialect">
-            <th mat-header-cell *matHeaderCellDef>Dialect</th>
-            <td mat-cell *matCellDef="let r">{{ r.dialect }}</td>
-          </ng-container>
-          <ng-container matColumnDef="register">
-            <th mat-header-cell *matHeaderCellDef>Register</th>
-            <td mat-cell *matCellDef="let r">{{ r.register }}</td>
-          </ng-container>
-          <ng-container matColumnDef="license">
-            <th mat-header-cell *matHeaderCellDef>License</th>
-            <td mat-cell *matCellDef="let r">{{ r.license }}</td>
-          </ng-container>
-          <ng-container matColumnDef="uploaded_at">
-            <th mat-header-cell *matHeaderCellDef>Uploaded</th>
-            <td mat-cell *matCellDef="let r">{{ r.uploaded_at | slice:0:19 }}</td>
-          </ng-container>
-          <tr mat-header-row *matHeaderRowDef="uploadCols"></tr>
-          <tr mat-row *matRowDef="let row; columns: uploadCols"></tr>
-        </table>
-      }
-    </mat-card-content>
-  </mat-card>
-}
+    @if (b.research_md) {
+      <section class="card mt-4">
+        <header class="card-head">
+          <h2><app-icon name="book"></app-icon> Research deep-dive</h2>
+        </header>
+        <div class="card-body">
+          <div class="md">
+            <markdown [data]="b.research_md"></markdown>
+          </div>
+        </div>
+      </section>
+    }
+
+    <section class="card mt-4">
+      <header class="card-head">
+        <h2><app-icon name="database"></app-icon> DBS Bible catalog</h2>
+        <span class="chip mono">{{ b.dbs_bibles.length }}</span>
+      </header>
+      <div class="card-body">
+        @if (b.dbs_bibles.length === 0) {
+          <div class="state">
+            <div class="icon"><app-icon name="inbox" [size]="20"></app-icon></div>
+            <h3>No catalog entries</h3>
+          </div>
+        } @else {
+          <table class="table">
+            <thead>
+              <tr><th>ID</th><th>Title</th><th>Vernacular</th><th>Year</th><th>Country</th></tr>
+            </thead>
+            <tbody>
+              @for (r of b.dbs_bibles; track r.id) {
+                <tr>
+                  <td><code class="mono">{{ r.id }}</code></td>
+                  <td>{{ r.tt }}</td>
+                  <td>{{ r.tv }}</td>
+                  <td>{{ r.dt }}</td>
+                  <td>{{ r.cn }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </section>
+
+    <section class="card mt-4">
+      <header class="card-head">
+        <h2><app-icon name="file_audio"></app-icon> Uploaded corpus</h2>
+        <span class="chip mono">{{ b.uploads_count }}</span>
+      </header>
+      <div class="card-body">
+        @if (b.uploads_count === 0) {
+          <div class="state">
+            <div class="icon"><app-icon name="inbox" [size]="20"></app-icon></div>
+            <h3>No uploads yet</h3>
+            <p>Use the Upload tab to add training data for this language.</p>
+          </div>
+        } @else {
+          <table class="table">
+            <thead>
+              <tr><th>UUID</th><th>Filename</th><th>Speaker</th><th>Dialect</th><th>Register</th><th>License</th><th>Uploaded</th></tr>
+            </thead>
+            <tbody>
+              @for (u of b.uploads; track u.uuid) {
+                <tr>
+                  <td><code class="mono">{{ u.uuid.slice(0, 8) }}…</code></td>
+                  <td>{{ u.filename_orig }}</td>
+                  <td>{{ u.speaker_id }}</td>
+                  <td>{{ u.dialect }}</td>
+                  <td><span class="chip outline">{{ u.register }}</span></td>
+                  <td><span class="chip outline">{{ u.license }}</span></td>
+                  <td>{{ u.uploaded_at | slice:0:19 }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </section>
+  }
+</div>

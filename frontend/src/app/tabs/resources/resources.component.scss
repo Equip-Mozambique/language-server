@@ -1,11 +1,12 @@
-.section {
-  margin-bottom: 1rem;
-}
-
-.error {
-  color: #b00020;
-}
-
-table {
+:host { display: block; }
+.table {
   width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
 }
+.table th, .table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.table th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }

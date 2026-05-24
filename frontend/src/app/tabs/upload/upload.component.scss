@@ -1,11 +1,8 @@
-.grid {
+.form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-top: 1rem;
+  gap: 14px;
 }
-.full { width: 100%; display: block; }
-.actions { display: flex; gap: 1rem; align-items: center; margin-top: 1rem; }
-.error { color: #b00020; }
-.ok { color: #2e7d32; }
-input[type=file] { display: block; margin-bottom: 1rem; }
+@media (max-width: 760px) {
+  .form-grid { grid-template-columns: 1fr; }
+}

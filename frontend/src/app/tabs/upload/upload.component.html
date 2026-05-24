@@ -1,67 +1,96 @@
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>Upload to corpus</mat-card-title>
-    <mat-card-subtitle>
-      Target: {{ state.selectedLang()?.name }} ({{ state.selectedIso() }})
-    </mat-card-subtitle>
-  </mat-card-header>
-  <mat-card-content>
-    <input type="file" accept="audio/*,.txt,.srt,.vtt" (change)="onFile($event)" />
-    @if (file(); as f) {
-      <p>{{ f.name }} ({{ f.size | number }} bytes, {{ f.type }})</p>
-    }
-
-    <div class="grid">
-      <mat-form-field appearance="outline">
-        <mat-label>Speaker ID</mat-label>
-        <input matInput [ngModel]="form().speaker_id" (ngModelChange)="patch('speaker_id', $event)" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Dialect</mat-label>
-        <input matInput [ngModel]="form().dialect" (ngModelChange)="patch('dialect', $event)" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Register</mat-label>
-        <mat-select [ngModel]="form().register" (ngModelChange)="patch('register', $event)">
-          @for (r of registers; track r) {
-            <mat-option [value]="r">{{ r }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>License</mat-label>
-        <mat-select [ngModel]="form().license" (ngModelChange)="patch('license', $event)">
-          @for (l of licenses; track l) {
-            <mat-option [value]="l">{{ l }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+<div class="page">
+  <div class="page-header">
+    <div class="titles">
+      <h1>Upload to corpus</h1>
+      <div class="sub">Add training data for {{ state.selectedLang()?.name }} ({{ state.selectedIso() }})</div>
     </div>
+  </div>
 
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Transcript (optional)</mat-label>
-      <textarea
-        matInput rows="4"
-        [ngModel]="form().transcript"
-        (ngModelChange)="patch('transcript', $event)"></textarea>
-    </mat-form-field>
-
-    <div class="actions">
-      <button
-        mat-flat-button
-        color="primary"
-        [disabled]="!file() || loading()"
-        (click)="submit()">
-        Upload
+  @if (!file()) {
+    <label
+      class="dropzone"
+      [class.over]="dragOver()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)">
+      <div class="dz-icon"><app-icon name="upload_cloud" [size]="20"></app-icon></div>
+      <h3>Drag and drop, or <span style="color: var(--accent-fg)">click to browse</span></h3>
+      <p>Audio/* or transcript (.txt/.srt/.vtt). Up to 500 MB.</p>
+      <input
+        type="file"
+        accept="audio/*,.txt,.srt,.vtt"
+        style="display:none"
+        (change)="onPick($event)"
+        aria-label="Select file to upload" />
+    </label>
+  } @else {
+    <div class="card" style="display: flex; align-items: center; padding: 14px 16px; gap: 12px;">
+      <div style="width:40px; height:40px; border-radius:8px; background: var(--accent-soft); color: var(--accent-fg); display: grid; place-items: center; flex-shrink: 0;">
+        <app-icon name="file_audio"></app-icon>
+      </div>
+      <div style="flex: 1; min-width: 0">
+        <div style="font-weight: 500; font-size: 13.5px;">{{ file()!.name }}</div>
+        <div class="text-xs text-muted">{{ file()!.size | number }} bytes · {{ file()!.type || 'binary' }}</div>
+      </div>
+      <button class="icon-btn" (click)="clearFile()" aria-label="Remove file">
+        <app-icon name="x"></app-icon>
       </button>
-      @if (loading()) { <mat-progress-bar mode="indeterminate" /> }
-      @if (error()) { <span class="error">{{ error() }}</span> }
-      @if (ok(); as r) {
-        <span class="ok">Stored as <code>{{ r.uuid.slice(0, 8) }}…</code> (sha256 {{ r.sha256.slice(0, 12) }}…)</span>
-      }
     </div>
-  </mat-card-content>
-</mat-card>
+  }
+
+  <section class="card mt-4">
+    <header class="card-head">
+      <h2><app-icon name="edit"></app-icon> Metadata</h2>
+    </header>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="field">
+          <label class="label" for="spk">Speaker ID</label>
+          <input id="spk" class="input" [ngModel]="form().speaker_id" (ngModelChange)="patch('speaker_id', $event)" />
+        </div>
+        <div class="field">
+          <label class="label" for="dia">Dialect</label>
+          <input id="dia" class="input" [ngModel]="form().dialect" (ngModelChange)="patch('dialect', $event)" />
+        </div>
+        <div class="field">
+          <label class="label" for="reg">Register</label>
+          <select id="reg" class="select" [ngModel]="form().register" (ngModelChange)="patch('register', $event)">
+            @for (r of registers; track r) { <option [value]="r">{{ r }}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label class="label" for="lic">License</label>
+          <select id="lic" class="select" [ngModel]="form().license" (ngModelChange)="patch('license', $event)">
+            @for (l of licenses; track l) { <option [value]="l">{{ l }}</option> }
+          </select>
+        </div>
+      </div>
+
+      <div class="field mt-3">
+        <label class="label" for="tr">Transcript (optional)</label>
+        <textarea
+          id="tr"
+          class="textarea"
+          rows="4"
+          [ngModel]="form().transcript"
+          (ngModelChange)="patch('transcript', $event)"
+          style="min-height: 100px"></textarea>
+      </div>
+
+      <div class="row gap-3 mt-4" style="align-items: center;">
+        <button class="btn primary" [disabled]="!file() || loading()" (click)="submit()">
+          @if (loading()) { <span class="spin"></span> Uploading… }
+          @else { <app-icon name="upload_cloud"></app-icon> Upload }
+        </button>
+        @if (error()) {
+          <span style="color: var(--red); font-size: 13px">{{ error() }}</span>
+        }
+        @if (ok(); as r) {
+          <span style="color: var(--green); font-size: 13px">
+            Stored as <code class="mono">{{ r.uuid.slice(0, 8) }}…</code> (sha256 {{ r.sha256.slice(0, 12) }}…)
+          </span>
+        }
+      </div>
+    </div>
+  </section>
+</div>

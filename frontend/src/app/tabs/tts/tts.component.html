@@ -1,34 +1,113 @@
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>Text-to-Speech</mat-card-title>
-    <mat-card-subtitle>
-      Language: {{ state.selectedLang()?.name }} ({{ state.selectedIso() }})
-      @if (!state.selectedLang()?.mms_tts) {
-        — <strong>no MMS-TTS model</strong>
-      }
-    </mat-card-subtitle>
-  </mat-card-header>
-  <mat-card-content>
-    <mat-form-field appearance="outline" class="text-area">
-      <mat-label>Text</mat-label>
-      <textarea matInput rows="6" [ngModel]="text()" (ngModelChange)="text.set($event)"></textarea>
-    </mat-form-field>
-
-    <div class="actions">
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="speak()"
-        [disabled]="loading() || !text().trim() || !state.selectedLang()?.mms_tts">
-        Speak
-      </button>
-      @if (loading()) { <span>Synthesising…</span> }
-      @if (error()) { <span class="error">{{ error() }}</span> }
+<div class="page">
+  <div class="page-header">
+    <div class="titles">
+      <h1>Text-to-speech</h1>
+      <div class="sub">
+        Synthesise speech in {{ state.selectedLang()?.name }} using the MMS-TTS model.
+      </div>
     </div>
+  </div>
 
-    @if (audioUrl(); as url) {
-      <audio [src]="url" controls class="player"></audio>
-      <p><a [href]="url" download="tts.wav">Download WAV</a></p>
-    }
-  </mat-card-content>
-</mat-card>
+  @if (!hasTts() && proxyLang()) {
+    <div class="card mb-4" style="background: var(--amber-soft); border-color: var(--amber-border);">
+      <div class="card-body" style="display: flex; align-items: center; gap: 14px;">
+        <app-icon name="warn" [size]="20"></app-icon>
+        <div style="flex: 1">
+          <strong>No TTS available for {{ state.selectedLang()?.name }}.</strong>
+          <div class="text-sm text-2 mt-2">
+            Try <strong>{{ proxyLang() }}</strong> — closest available voice.
+          </div>
+        </div>
+        <button class="btn" (click)="switchToProxy()">
+          <app-icon name="refresh"></app-icon>
+          Switch to {{ proxyLang() }}
+        </button>
+      </div>
+    </div>
+  } @else if (!hasTts()) {
+    <div class="card mb-4" style="background: var(--red-soft); border-color: var(--red-border);">
+      <div class="card-body row gap-3">
+        <app-icon name="alert" [size]="20"></app-icon>
+        <div>
+          <strong>No TTS coverage for {{ state.selectedLang()?.name }}.</strong>
+          <div class="text-sm text-2 mt-2">
+            No proxy language configured. Speech synthesis unavailable.
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="two-col">
+    <section class="card">
+      <header class="card-head">
+        <h2><app-icon name="edit"></app-icon> Text</h2>
+        <span class="text-xs" [style.color]="text().length > MAX_LEN ? 'var(--red)' : 'var(--muted)'">
+          {{ text().length }} / {{ MAX_LEN }}
+        </span>
+      </header>
+      <div class="card-body">
+        <textarea
+          class="textarea"
+          [ngModel]="text()"
+          (ngModelChange)="text.set($event)"
+          [placeholder]="'Type or paste text in ' + (state.selectedLang()?.name ?? '') + '…'"
+          aria-label="Text to synthesise"
+          [maxlength]="MAX_LEN"
+          style="min-height: 180px; font-family: var(--font-serif); font-size: 15px;"></textarea>
+        <div class="row gap-3 mt-4" style="align-items: center;">
+          <div class="field" style="margin: 0; flex: 1; max-width: 280px;">
+            <label class="label" for="voice">Voice</label>
+            <select id="voice" class="select sm" [disabled]="!hasTts()">
+              <option>Default MMS voice</option>
+            </select>
+          </div>
+          <div style="flex: 1"></div>
+          <button
+            class="btn primary lg"
+            (click)="speak()"
+            [disabled]="!hasTts() || !text().trim() || loading()">
+            @if (loading()) {
+              <span class="spin"></span> Synthesising…
+            } @else {
+              <app-icon name="speaker"></app-icon> Speak
+            }
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <header class="card-head">
+        <h2><app-icon name="speaker"></app-icon> Output</h2>
+        @if (audioUrl()) {
+          <span class="chip green">ready</span>
+        } @else {
+          <span class="chip outline">idle</span>
+        }
+      </header>
+      <div class="card-body">
+        @if (audioUrl(); as url) {
+          <audio [src]="url" controls style="width: 100%"></audio>
+          <div class="row gap-2 mt-3" style="justify-content: flex-end">
+            <a class="btn sm" [href]="url" download="tts.wav">
+              <app-icon name="download"></app-icon> .wav
+            </a>
+          </div>
+        } @else {
+          <div class="state">
+            <div class="icon"><app-icon name="speaker" [size]="20"></app-icon></div>
+            <h3>No synthesis yet</h3>
+            <p>Type text and press Speak. Output appears here with a downloadable .wav.</p>
+          </div>
+        }
+        @if (error()) {
+          <div class="state error mt-3">
+            <div class="icon"><app-icon name="alert" [size]="20"></app-icon></div>
+            <h3>{{ error() }}</h3>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</div>

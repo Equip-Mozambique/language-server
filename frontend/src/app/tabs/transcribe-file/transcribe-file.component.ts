@@ -1,8 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { IconComponent } from '../../core/icon.component';
 import { ApiService } from '../../core/api.service';
 import { LanguageStateService } from '../../core/language-state.service';
 import { TranscribeResponse } from '../../core/models';
@@ -10,7 +8,7 @@ import { TranscribeResponse } from '../../core/models';
 @Component({
   selector: 'app-transcribe-file',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatCardModule, MatProgressBarModule],
+  imports: [CommonModule, IconComponent],
   templateUrl: './transcribe-file.component.html',
   styleUrl: './transcribe-file.component.scss',
 })
@@ -19,17 +17,42 @@ export class TranscribeFileComponent {
   state = inject(LanguageStateService);
 
   file = signal<File | null>(null);
+  dragOver = signal(false);
   result = signal<TranscribeResponse | null>(null);
   loading = signal(false);
   error = signal<string | null>(null);
 
-  onFile(event: Event) {
+  onPick(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.file.set(input.files[0]);
-      this.result.set(null);
-      this.error.set(null);
-    }
+    if (input.files?.[0]) this.setFile(input.files[0]);
+  }
+
+  onDrop(e: DragEvent) {
+    e.preventDefault();
+    this.dragOver.set(false);
+    const f = e.dataTransfer?.files?.[0];
+    if (f) this.setFile(f);
+  }
+
+  onDragOver(e: DragEvent) {
+    e.preventDefault();
+    this.dragOver.set(true);
+  }
+
+  onDragLeave() {
+    this.dragOver.set(false);
+  }
+
+  private setFile(f: File) {
+    this.file.set(f);
+    this.result.set(null);
+    this.error.set(null);
+  }
+
+  clear() {
+    this.file.set(null);
+    this.result.set(null);
+    this.error.set(null);
   }
 
   transcribe() {

@@ -1,42 +1,64 @@
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>Live Transcribe</mat-card-title>
-    <mat-card-subtitle>
-      {{ state.selectedLang()?.name }} ({{ state.selectedIso() }}) → {{ state.target() | uppercase }}
-    </mat-card-subtitle>
-  </mat-card-header>
-  <mat-card-content>
-    <div class="controls">
-      <button mat-flat-button color="primary" (click)="toggle()">
+<div class="page">
+  <div class="page-header">
+    <div class="titles">
+      <h1>Live transcribe</h1>
+      <div class="sub">
+        {{ state.selectedLang()?.name }} → {{ state.target() | uppercase }} · 4-second chunks
+      </div>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="card-body row gap-3" style="align-items: center;">
+      <button
+        class="btn primary lg"
+        (click)="toggle()"
+        [class.recording]="recording()">
         @if (recording()) {
-          <mat-icon>stop</mat-icon> Stop
+          <app-icon name="stop"></app-icon> Stop
         } @else {
-          <mat-icon>mic</mat-icon> Record
+          <app-icon name="mic"></app-icon> Record
         }
       </button>
-      <span class="status">
-        @if (recording()) { Recording… 4-second chunks } @else { Idle }
+      <div class="vu" aria-hidden="true">
+        @for (i of vuBars; track i) {
+          <div class="bar" [style.height.%]="barHeight(i)"></div>
+        }
+      </div>
+      <span class="text-muted" style="margin-left: auto; font-size: 13px;">
+        @if (recording()) { Recording… } @else { Idle }
       </span>
     </div>
+  </section>
 
-    @if (recording()) {
-      <mat-progress-bar mode="determinate" [value]="level() * 200"></mat-progress-bar>
-    }
+  @if (error()) {
+    <div class="state error mt-3">
+      <div class="icon"><app-icon name="alert" [size]="20"></app-icon></div>
+      <h3>{{ error() }}</h3>
+    </div>
+  }
 
-    @if (error()) { <p class="error">{{ error() }}</p> }
-
-    @if (rows().length === 0 && !recording()) {
-      <p><em>Press Record to start.</em></p>
-    }
-
-    <div class="rows">
+  <section class="card mt-4">
+    <header class="card-head">
+      <h2><app-icon name="pulse"></app-icon> Stream</h2>
+      <span class="chip mono">{{ rows().length }} chunks</span>
+    </header>
+    <div class="card-body">
+      @if (rows().length === 0 && !recording()) {
+        <div class="state">
+          <div class="icon"><app-icon name="mic" [size]="20"></app-icon></div>
+          <h3>Press Record to start</h3>
+          <p>Audio captured at 16 kHz, segmented into 4-second chunks.</p>
+        </div>
+      }
       @for (row of rows(); track $index) {
-        <div class="row">
+        <div class="stream-row">
           <div class="ts">{{ row.ts }}</div>
           <div class="text">
-            <div class="transcript">{{ row.transcript }}</div>
+            <div class="transcript">{{ row.transcript || '—' }}</div>
             @if (row.covered) {
               <div class="translation">{{ row.translation }}</div>
+              <span class="chip outline xs">engine: {{ row.engine }}</span>
             } @else {
               <div class="translation no-mt">(no translation: {{ row.engine }})</div>
             }
@@ -44,5 +66,5 @@
         </div>
       }
     </div>
-  </mat-card-content>
-</mat-card>
+  </section>
+</div>

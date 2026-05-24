@@ -449,3 +449,104 @@ download URLs from `audio.dbs.org/<abbr>/...` and add to bulk downloader.
 
 Action: extend `dbp_download.py` (or add `dbs_download.py`) to fetch DBS audio
 for the 5 newly-discovered full Bibles + Bantu adjacents.
+
+---
+
+## Video Bible Resources (2026-05-24 audit)
+
+### Major find: Arclight (Jesus Film Project) API — open, no key
+
+Base URL: **`https://api.arclight.org/v2/`**. Powers `jesusfilm.org`.
+
+Endpoints:
+- `GET /v2/media-languages?term=<name>` — search by language name → returns `languageId`
+- `GET /v2/media-components?languageIds=<id>` — list videos for that lang
+- `GET /v2/media-components/<id>/languages/<langid>` — **returns direct mux.com mp4 URLs**
+
+Video URL pattern: `https://stream.mux.com/<assetId>/720p.mp4` (also 270p mp4 + HLS .m3u8)
+
+Films available per lang (varies):
+- **JESUS Film** (`1_jf-0-0`) — ~2hr, 61 segments
+- **Magdalena** (`1_mld-0-0`) — ~44 segments
+- **Story of Jesus for Children** (`1_cl-0-0`)
+- **Lumo Gospel** features (per-lang IDs)
+- Plus shorts, dramatized passages
+
+License: free non-commercial mission use → fits our NGO scope. ASR/TTS training on dramatized speech = excellent data (clean studio, multiple voice actors).
+
+Docs: https://docs.core.jesusfilm.org/docs/welcome
+GitHub: https://github.com/JesusFilm/core
+
+### Per-language video coverage (Arclight)
+
+| ISO | Lang | Arclight ID | series/feat/short | JF | Mag | SoJC | Lumo |
+|---|---|---|---|---|---|---|---|
+| sna | Shona | 8506 | 3/6/19 | ✓ | ✓ | ✓ | likely |
+| nde | N. Ndebele | 20851 | 2/5/18 | ✓ | ✓ | – | likely |
+| nbl | S. Ndebele | 20852 | –/1/– | ✓ | – | – | – |
+| nya | Chichewa | 20857 | 4/6/20 | ✓ | ✓ | ✓ | **YES** |
+| toi | Tonga | — | — | ✓ | – | – | likely |
+| kck | Kalanga | — | — | ✓ | – | – | – |
+| nmq | Nambya | — | — | ✓ | – | – | – |
+| ven | Venda | — | — | ✓ | – | ✓ | likely |
+| tso | Tsonga | — | — | ✓ | – | – | likely |
+| por | Portuguese | — | — | ✓ | ✓ | ✓ | **YES (Vimeo)** |
+| vmw | Makhuwa | 142483 | 1/1/– | ✓ | – | – | – |
+| seh | Sena | — | — | ✓ | – | – | – |
+| ngl | Lomwe | — | — | ✓ | – | – | – |
+| chw | Chuwabo | — | — | ✓ | – | – | – |
+| ndc | Ndau | — | — | ✓ | – | – | – |
+| tsc | Tswa | — | — | ✓ | – | – | – |
+| rng | Ronga | — | — | ✓ | – | – | – |
+| yao | Yao | 7773 | 2/5/– | ✓ | ✓ | ✓ | – |
+| **kde** | **Makonde** | — | — | ✓ | – | – | – |
+| mgh | Makhuwa-Meetto | — | — | ✓ | – | – | – |
+
+### Lumo Project (lumoproject.com / YouTube)
+
+Word-for-word Gospel video productions. NIV (Matt/Luke/John) or KJV (Mark) source.
+Confirmed targets:
+- **Chichewa (nya)** — full 4 Gospels on YouTube
+  - Luke: https://www.youtube.com/playlist?list=PLcJVIuhI8isI4n5CYBy0RAdnkZNhKeBNx
+  - Matthew: https://www.youtube.com/playlist?list=PLcJVIuhI8isJRQKSYczMYzqN4yhEmYUYA
+  - 65+ episodes, 2-5 min each, 720p+
+- **Portuguese** — Vimeo: https://vimeopro.com/user55617730/lumo-project-portugusese
+- English reference playlists (for parallel alignment):
+  - Matthew: PLulKDT_43n4qXvfwdxje6Tl-1XTD9BT4k
+  - Luke: PLulKDT_43n4puXdkP0PspB8bS75DaE7Zi
+  - Mark: PLulKDT_43n4rHp2987ZesP9VBFmZF-CcO
+
+Download tool: `yt-dlp --write-sub --sub-lang en <playlist_url>`
+
+### ScriptureEarth (scriptureearth.org)
+
+Per-ISO index page: `scriptureearth.org/00i-Scripture_Index.php?iso=<iso>`
+Aggregates text + audio + video links from Bible.is, GRN, JFP, Lumo.
+
+**Special find: Makonde (kde)** — direct per-book mp3 download links visible
+on its index page (full NT + Genesis OT). ~64-96kbps mono. Cleanest paired
+script+audio in our 19-target set. Action: download via Task #10.
+
+### find.bible
+
+Per-ISO URL: `https://find.bible/languages/<iso>` (no trailing slash; trailing = 403).
+Run by Forum of Bible Agencies + DBS. Catalogues 6,552 versions across 7,929 langs.
+Best as publisher cross-reference, not asset source.
+
+### Ethnologue — paywalled, skip
+
+403 to unauthenticated. $480-$2,400/yr subscription. Free "Essentials" only for
+low-income country residents. Use **Glottolog** (glottolog.org) for open
+alternative — speaker counts + classification.
+
+### Sites scraped clean (no major new info)
+- find.bible (cross-ref only)
+- ethnologue (paywalled, skipped)
+- lumoproject.com (just marketing; real data via YouTube/Arclight)
+
+### Action items
+
+1. Build `aiserver.arclight` client — fetch per-lang JESUS Film + Lumo mux URLs
+2. Download ScriptureEarth Makonde NT audio (highest signal-to-noise paired audio)
+3. yt-dlp Chichewa Lumo playlists for paired Gospel video + English script
+4. Drop Ethnologue from active scraping

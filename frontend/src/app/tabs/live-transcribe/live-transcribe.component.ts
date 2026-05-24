@@ -1,10 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Subscription } from 'rxjs';
+import { IconComponent } from '../../core/icon.component';
 import { LanguageStateService } from '../../core/language-state.service';
 import { WsService } from '../../core/ws.service';
 import { WsChunkResponse } from '../../core/models';
@@ -17,13 +14,7 @@ interface ChunkRow extends WsChunkResponse {
 @Component({
   selector: 'app-live-transcribe',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatCardModule,
-    MatIconModule,
-    MatProgressBarModule,
-  ],
+  imports: [CommonModule, IconComponent],
   templateUrl: './live-transcribe.component.html',
   styleUrl: './live-transcribe.component.scss',
 })
@@ -47,7 +38,7 @@ export class LiveTranscribeComponent {
     }
   }
 
-  async start() {
+  private async start() {
     this.error.set(null);
     this.rows.set([]);
     try {
@@ -81,12 +72,21 @@ export class LiveTranscribeComponent {
     }
   }
 
-  async stop() {
+  private async stop() {
     await this.mic.stop();
     this.ws.close();
     this.subs.forEach((s) => s.unsubscribe());
     this.subs = [];
     this.recording.set(false);
     this.level.set(0);
+  }
+
+  // 12 fake VU bars for visual when recording — height driven by mic.level$
+  vuBars = Array.from({ length: 12 }, (_, i) => i);
+  barHeight(i: number): number {
+    const base = this.level();
+    if (base === 0) return 18;
+    const wobble = 0.4 + 0.6 * Math.sin(Date.now() / 100 + i * 0.7);
+    return Math.min(100, Math.max(20, base * 100 * (0.7 + 0.6 * Math.abs(wobble))));
   }
 }

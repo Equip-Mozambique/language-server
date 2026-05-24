@@ -1,12 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { IconComponent } from '../../core/icon.component';
 import { ApiService } from '../../core/api.service';
 import { LanguageStateService } from '../../core/language-state.service';
 
@@ -29,16 +24,7 @@ const EMPTY_FORM: FormState = {
 @Component({
   selector: 'app-upload',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatButtonModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatProgressBarModule,
-  ],
+  imports: [CommonModule, FormsModule, IconComponent],
   templateUrl: './upload.component.html',
   styleUrl: './upload.component.scss',
 })
@@ -50,18 +36,41 @@ export class UploadComponent {
   licenses = ['CC-BY', 'CC-BY-NC', 'CC0', 'proprietary', 'unknown'];
 
   file = signal<File | null>(null);
+  dragOver = signal(false);
   form = signal<FormState>({ ...EMPTY_FORM });
   loading = signal(false);
   error = signal<string | null>(null);
   ok = signal<{ uuid: string; sha256: string } | null>(null);
 
-  onFile(e: Event) {
+  onPick(e: Event) {
     const input = e.target as HTMLInputElement;
-    if (input.files?.[0]) {
-      this.file.set(input.files[0]);
-      this.ok.set(null);
-      this.error.set(null);
-    }
+    if (input.files?.[0]) this.setFile(input.files[0]);
+  }
+
+  onDrop(e: DragEvent) {
+    e.preventDefault();
+    this.dragOver.set(false);
+    const f = e.dataTransfer?.files?.[0];
+    if (f) this.setFile(f);
+  }
+
+  onDragOver(e: DragEvent) {
+    e.preventDefault();
+    this.dragOver.set(true);
+  }
+
+  onDragLeave() {
+    this.dragOver.set(false);
+  }
+
+  private setFile(f: File) {
+    this.file.set(f);
+    this.ok.set(null);
+    this.error.set(null);
+  }
+
+  clearFile() {
+    this.file.set(null);
   }
 
   patch<K extends keyof FormState>(k: K, v: FormState[K]) {

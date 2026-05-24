@@ -1,50 +1,153 @@
-<mat-toolbar color="primary" class="topbar">
-  <span class="title">BatePapo</span>
+<div class="app">
+  <header class="top-bar" role="banner">
+    <div class="top-bar-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">B</div>
+        <div>BatePapo</div>
+        <div class="brand-sub desktop-only">Equip Mozambique</div>
+      </div>
 
-  <mat-form-field appearance="outline" class="lang-picker">
-    <mat-label>Language</mat-label>
-    <mat-select [value]="state.selectedIso()" (selectionChange)="state.setLang($event.value)">
-      @for (lang of state.languages(); track lang.iso) {
-        <mat-option [value]="lang.iso">
-          {{ lang.name }} <span class="iso">({{ lang.iso }})</span>
-          <span class="country">{{ lang.country }}</span>
-        </mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+      <div class="spacer"></div>
 
-  <mat-button-toggle-group [value]="state.target()" (change)="setTarget($event.value)">
-    <mat-button-toggle value="en">EN</mat-button-toggle>
-    <mat-button-toggle value="pt">PT</mat-button-toggle>
-  </mat-button-toggle-group>
+      <!-- Language picker -->
+      <div class="lang-picker">
+        <button
+          type="button"
+          class="lang-picker-trigger"
+          (click)="togglePicker()"
+          [attr.aria-expanded]="pickerOpen()"
+          aria-haspopup="listbox"
+          [attr.aria-label]="'Selected language: ' + (state.selectedLang()?.name || '') + '. Click to change.'">
+          <app-icon name="globe"></app-icon>
+          <span class="name">{{ state.selectedLang()?.name ?? '—' }}</span>
+          <span class="iso">{{ state.selectedIso() }}</span>
+          <app-icon name="chev_down" [size]="12"></app-icon>
+        </button>
 
-  <span class="spacer"></span>
+        @if (pickerOpen()) {
+          <div class="lang-picker-pop" role="listbox" aria-label="Languages">
+            <div class="lang-picker-search">
+              <app-icon name="search"></app-icon>
+              <input
+                #searchInput
+                [ngModel]="query()"
+                (ngModelChange)="query.set($event); activeIndex.set(0)"
+                (keydown)="onPickerKey($event)"
+                placeholder="Search by name, ISO or country…"
+                aria-label="Search languages" />
+              <kbd>esc</kbd>
+            </div>
+            <div class="lang-picker-list">
+              @if (filteredLangs().length === 0) {
+                <div class="state" style="padding: 18px">
+                  <p>No matches for "{{ query() }}".</p>
+                </div>
+              } @else {
+                @for (l of filteredLangs(); track l.iso; let i = $index) {
+                  <div
+                    class="lang-row"
+                    role="option"
+                    [attr.aria-selected]="i === activeIndex() || l.iso === state.selectedIso()"
+                    (mouseenter)="activeIndex.set(i)"
+                    (click)="pickLang(l.iso)">
+                    <div class="lr-name">
+                      <strong>{{ l.name }}</strong>
+                      <span class="meta">
+                        <span class="chip outline mono">{{ l.country }}</span>
+                        @if (l.proxy_iso) {
+                          <span style="color: var(--muted)">→ proxy {{ l.proxy_iso }}</span>
+                        }
+                        @if (l.status === 'missing') {
+                          <span style="color: var(--red)">missing</span>
+                        }
+                      </span>
+                    </div>
+                    <span class="cov-dots" [attr.aria-label]="'Coverage for ' + l.name">
+                      <span class="d" [class.on]="l.mms_iso" [class.proxy]="!l.mms_iso && l.proxy_iso"></span>
+                      <span class="d" [class.on]="l.mms_tts" [class.proxy]="!l.mms_tts && l.proxy_iso"></span>
+                      <span class="d" [class.on]="l.whisper_code"></span>
+                    </span>
+                    <span class="lr-iso">{{ l.iso }}</span>
+                  </div>
+                }
+              }
+            </div>
+            <div class="lang-picker-foot">
+              <span>{{ filteredLangs().length }} language{{ filteredLangs().length === 1 ? '' : 's' }}</span>
+              <span><kbd>↑</kbd> <kbd>↓</kbd> to move, <kbd>↵</kbd> to select</span>
+            </div>
+          </div>
+        }
+      </div>
 
-  @if (state.selectedLang(); as lang) {
-    <mat-chip-set>
-      <mat-chip [color]="lang.whisper_code ? 'primary' : ''">
-        Whisper: {{ lang.whisper_code ?? '—' }}
-      </mat-chip>
-      <mat-chip [color]="lang.mms_iso ? 'primary' : ''">
-        MMS-ASR: {{ lang.mms_iso ?? '—' }}
-      </mat-chip>
-      <mat-chip [color]="lang.mms_tts ? 'primary' : ''">
-        MMS-TTS: {{ lang.mms_tts ?? '—' }}
-      </mat-chip>
-      <mat-chip>{{ lang.status }}</mat-chip>
-    </mat-chip-set>
-  }
-</mat-toolbar>
+      <!-- EN/PT segmented -->
+      <div class="seg" role="group" aria-label="Translation target language">
+        <button type="button" [attr.aria-pressed]="state.target() === 'en'" (click)="setTarget('en')">EN</button>
+        <button type="button" [attr.aria-pressed]="state.target() === 'pt'" (click)="setTarget('pt')">PT</button>
+      </div>
 
-<nav mat-tab-nav-bar [tabPanel]="tabPanel">
-  <a mat-tab-link routerLink="/live" routerLinkActive #live="routerLinkActive" [active]="live.isActive">Live Transcribe</a>
-  <a mat-tab-link routerLink="/file" routerLinkActive #file="routerLinkActive" [active]="file.isActive">Transcribe File</a>
-  <a mat-tab-link routerLink="/tts" routerLinkActive #tts="routerLinkActive" [active]="tts.isActive">TTS</a>
-  <a mat-tab-link routerLink="/resources" routerLinkActive #res="routerLinkActive" [active]="res.isActive">Resources</a>
-  <a mat-tab-link routerLink="/upload" routerLinkActive #up="routerLinkActive" [active]="up.isActive">Upload</a>
-</nav>
-<mat-tab-nav-panel #tabPanel>
-  <main class="page">
+      <!-- Theme toggle -->
+      <button
+        type="button"
+        class="icon-btn"
+        (click)="toggleTheme()"
+        [attr.aria-label]="state.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
+        <app-icon [name]="state.theme() === 'dark' ? 'sun' : 'moon'"></app-icon>
+      </button>
+    </div>
+
+    <!-- Coverage banner -->
+    @if (coverageNeedsBanner() && state.selectedLang(); as lang) {
+      <div class="coverage-banner {{ coverageTone() }}" role="status" aria-live="polite">
+        <div class="coverage-banner-inner">
+          <app-icon name="warn"></app-icon>
+          <strong>{{ lang.name }}</strong>
+          <span class="chip mono">{{ lang.iso }}</span>
+          <span>—</span>
+          @if (lang.status === 'proxy' && lang.proxy_iso) {
+            <span>proxying ASR & TTS to <strong>{{ lang.proxy_iso }}</strong></span>
+          } @else {
+            @if (!lang.mms_iso) { <span>MMS-ASR <app-icon name="x" [size]="11"></app-icon></span> }
+            @if (!lang.mms_tts) { <span>MMS-TTS <app-icon name="x" [size]="11"></app-icon></span> }
+            @if (!lang.whisper_code) { <span>Whisper <app-icon name="x" [size]="11"></app-icon></span> }
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Tab nav -->
+    <nav class="tab-bar desktop-only" aria-label="Sections">
+      <div class="tab-bar-inner">
+        @for (tab of tabs; track tab.id) {
+          <a
+            class="tab-btn"
+            [routerLink]="['/' + tab.id]"
+            routerLinkActive
+            #rla="routerLinkActive"
+            [attr.aria-current]="rla.isActive ? 'page' : null">
+            <app-icon [name]="tab.icon"></app-icon>
+            {{ tab.label }}
+          </a>
+        }
+      </div>
+    </nav>
+  </header>
+
+  <main>
     <router-outlet />
   </main>
-</mat-tab-nav-panel>
+
+  <!-- Mobile bottom nav -->
+  <nav class="bottom-nav mobile-only" aria-label="Sections">
+    @for (tab of tabs; track tab.id) {
+      <a
+        [routerLink]="['/' + tab.id]"
+        routerLinkActive
+        #rla="routerLinkActive"
+        [attr.aria-current]="rla.isActive ? 'page' : null">
+        <app-icon [name]="tab.icon" [size]="20"></app-icon>
+        <span>{{ tab.short }}</span>
+      </a>
+    }
+  </nav>
+</div>

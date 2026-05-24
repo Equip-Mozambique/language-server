@@ -1,32 +1,89 @@
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>Transcribe a file</mat-card-title>
-    <mat-card-subtitle>
-      Source: {{ state.selectedLang()?.name }} ({{ state.selectedIso() }}) → {{ state.target() | uppercase }}
-    </mat-card-subtitle>
-  </mat-card-header>
-  <mat-card-content>
-    <input type="file" accept="audio/*" (change)="onFile($event)" />
-    @if (file(); as f) { <p>{{ f.name }} ({{ f.size | number }} bytes)</p> }
-    <button
-      mat-flat-button
-      color="primary"
-      [disabled]="!file() || loading()"
-      (click)="transcribe()">
-      Transcribe
-    </button>
-    @if (loading()) { <mat-progress-bar mode="indeterminate" /> }
-    @if (error()) { <p class="error">{{ error() }}</p> }
-    @if (result(); as r) {
-      <h3>Transcript</h3>
-      <pre>{{ r.transcript }}</pre>
-      <h3>Translation ({{ r.target | uppercase }})</h3>
-      @if (r.covered) {
-        <pre>{{ r.translation }}</pre>
-        <p><small>engine: {{ r.engine }}</small></p>
-      } @else {
-        <p><em>No MT coverage for {{ r.lang }} → {{ r.target }} (engine: {{ r.engine }}).</em></p>
-      }
-    }
-  </mat-card-content>
-</mat-card>
+<div class="page">
+  <div class="page-header">
+    <div class="titles">
+      <h1>Transcribe a file</h1>
+      <div class="sub">
+        Source: {{ state.selectedLang()?.name }} → {{ state.target() | uppercase }}
+      </div>
+    </div>
+  </div>
+
+  @if (!file()) {
+    <label
+      class="dropzone"
+      [class.over]="dragOver()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)">
+      <div class="dz-icon"><app-icon name="upload_cloud" [size]="20"></app-icon></div>
+      <h3>Drag and drop, or <span style="color: var(--accent-fg)">click to browse</span></h3>
+      <p>Accepts audio/*. Up to 200 MB.</p>
+      <input
+        type="file"
+        accept="audio/*"
+        style="display: none"
+        (change)="onPick($event)"
+        aria-label="Select audio file" />
+    </label>
+  } @else {
+    <div class="card" style="display: flex; align-items: center; padding: 14px 16px; gap: 12px;">
+      <div style="width:40px; height:40px; border-radius:8px; background: var(--accent-soft); color: var(--accent-fg); display: grid; place-items: center; flex-shrink: 0;">
+        <app-icon name="file_audio"></app-icon>
+      </div>
+      <div style="flex: 1; min-width: 0">
+        <div style="font-weight: 500; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ file()!.name }}</div>
+        <div class="text-xs text-muted">{{ file()!.size | number }} bytes · {{ file()!.type || 'audio' }}</div>
+      </div>
+      <button class="icon-btn" (click)="clear()" aria-label="Remove file">
+        <app-icon name="x"></app-icon>
+      </button>
+    </div>
+
+    <div class="row gap-2 mt-3">
+      <button class="btn primary" (click)="transcribe()" [disabled]="loading()">
+        @if (loading()) { <span class="spin"></span> Transcribing… }
+        @else { Transcribe }
+      </button>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="state error mt-3">
+      <div class="icon"><app-icon name="alert" [size]="20"></app-icon></div>
+      <h3>Transcription failed</h3>
+      <p>{{ error() }}</p>
+    </div>
+  }
+
+  @if (result(); as r) {
+    <div class="two-col mt-4">
+      <section class="card">
+        <header class="card-head">
+          <h2><app-icon name="file"></app-icon> Transcript</h2>
+          <span class="chip mono">{{ r.lang }}</span>
+        </header>
+        <div class="card-body">
+          <pre class="text-block">{{ r.transcript }}</pre>
+        </div>
+      </section>
+      <section class="card">
+        <header class="card-head">
+          <h2><app-icon name="globe"></app-icon> Translation</h2>
+          <span class="chip mono">{{ r.target | uppercase }}</span>
+        </header>
+        <div class="card-body">
+          @if (r.covered) {
+            <pre class="text-block">{{ r.translation }}</pre>
+            <div class="row gap-2 mt-3"><span class="chip outline">engine: {{ r.engine }}</span></div>
+          } @else {
+            <div class="state">
+              <div class="icon"><app-icon name="info" [size]="20"></app-icon></div>
+              <h3>No MT coverage</h3>
+              <p>No translation engine for {{ r.lang }} → {{ r.target }} (engine: {{ r.engine }}).</p>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+  }
+</div>
