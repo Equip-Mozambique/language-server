@@ -1,7 +1,7 @@
 [project]
 name = "aiserver"
 version = "0.1.0"
-description = "TTS/STT pipeline for low-resource Zimbabwean and Mozambican languages"
+description = "BatePapo — TTS/STT pipeline for low-resource Zimbabwean and Mozambican languages"
 requires-python = ">=3.12"
 dependencies = [
     "torch>=2.5",

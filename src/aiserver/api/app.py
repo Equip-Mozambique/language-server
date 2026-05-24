@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="ai-server", lifespan=lifespan)
+app = FastAPI(title="BatePapo", lifespan=lifespan)
 
 from .routes_langs import router as langs_router  # noqa: E402
 from .routes_stt import router as stt_router  # noqa: E402

@@ -90,6 +90,22 @@ Host eu-ai1
 ssh ai-server nvidia-smi
 ```
 
+## Sync rules (CRITICAL)
+
+**The server is shared — other programmers work on it directly.** The local
+folder is **not** the source of truth.
+
+- `scripts/sync.sh` is **ADD/UPDATE only** (no `--delete`)
+- Never run `rsync --delete` against the server
+- Never `rm -rf` paths you didn't personally create
+- Files renamed/removed locally must be cleaned up manually with explicit SSH
+  if removal is actually intended
+- The `~/ai-server/data/` directory on the server contains valuable work
+  (downloads, research, models) that may not exist locally — treat as read-only
+  unless explicitly told otherwise
+- Past incidents: sync with `--delete` wiped `.env` (DBP key), then later wiped
+  `data/research/progress_bible/` after a successful authenticated fetch
+
 ## Common ops
 
 ```bash
