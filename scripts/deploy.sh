@@ -14,8 +14,8 @@ echo "==> building Angular frontend"
 
 echo "==> rsync source to ai-server:~/ai-server"
 rsync -avz --delete --exclude '.venv' --exclude '__pycache__' --exclude 'node_modules' \
-      --exclude 'work' --exclude '.git' --exclude 'data/cache' --exclude 'data/models' \
-      --exclude 'frontend/.angular' \
+      --exclude 'work' --exclude '.git' --exclude 'data' \
+      --exclude 'frontend/.angular' --exclude 'frontend/node_modules' \
       "${ROOT}/" ai-server:~/ai-server/
 
 echo "==> remote: uv sync + smoke"

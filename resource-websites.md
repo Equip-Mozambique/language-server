@@ -208,3 +208,158 @@ Crawled all listed primary sites; extracted outbound links; filtered for Christi
 6. **`pioneerbible.org`** — Bibleless peoples, possibly targeting our gap langs (Nambya, Kalanga)
 7. **`twftw.org`** — Mozambique field office, may have Lomwe/Chuwabo/Yao recordings
 8. **`onehope.net`** — children's Scripture content, simple/clean audio = ASR-friendly
+
+---
+
+## 2nd-degree discoveries (2026-05-24, deduped)
+
+### Audio Bible / Scripture audio (newly discovered)
+
+| URL | Context | Found via |
+|---|---|---|
+| https://biblebox.org | Offline Scripture distribution via Wi-Fi box | tools.bible |
+| https://www.renewoutreach.com/lightstream | Projector-driven media evangelism | tools.bible |
+| https://www.cvglobal.co | Christian Vision global digital evangelism | tools.bible |
+| https://www.storyrunners.org | **Cru oral storying — confirmed sna/nde/nya/yao/tso recordings, possibly ndc** | direct probe |
+
+### Text Bible / Bible Societies (newly discovered)
+
+| URL | Context | Found via |
+|---|---|---|
+| https://bibleaccesslist.org | Translation availability DB (alt to progress.bible) | bibleleague |
+| https://store.bibleleague.org | Bible League shop | bibleleague |
+| https://bibleleague.org/apps | ERV Bible apps | bibleleague |
+| https://academiadabiblia.org.br | SBB Brazilian Bible study | sbb.org.br |
+| https://sbb.com.br | SBB shop | sbb.org.br |
+| https://www.lojadabiblia.pt | Portuguese Bible Society shop | biblia.pt |
+| http://www.biblia.pt | **Actual Sociedade Bíblica de Portugal domain** | sociedade-biblica.pt |
+| https://lojabiblica.pt | Portuguese Bible Society shop | biblia.pt |
+| https://open.bible | Open/CC-licensed Bible translations portal | tools.bible |
+| https://docs.api.bible | API.Bible REST API docs | library.bible |
+| https://www.esv.org | ESV Bible online | crossway |
+| https://virtualstorehouse.org | Digital Scripture/ministry assets | forum-intl |
+
+### Translation / Mission (newly discovered)
+
+| URL | Context | Found via |
+|---|---|---|
+| https://lbt.org | Lutheran Bible Translators (canonical) | eten.bible |
+| https://ethnos360aviation.org | Ethnos360 aviation arm | ethnos360 |
+| https://ethnos360training.org | Ethnos360 missionary training | ethnos360 |
+| https://biblestudy.ethnos360.org | Ethnos360 bookstore | ethnos360 |
+| https://www.imb.org | International Mission Board | joshuaproject |
+| https://www.frontiersusa.org | Frontiers — unreached peoples | joshuaproject |
+| https://www.pioneers.org | Pioneers cross-cultural missions | joshuaproject |
+| https://www.samaritanspurse.org | Samaritan's Purse | joshuaproject |
+| https://allianceforunreached.org | Alliance for the Unreached | joshuaproject |
+| https://indigitous.org | Digital-missions network | joshuaproject |
+| https://www.teamexpansion.org | Team Expansion | joshuaproject |
+| https://www.perspectives.org | Perspectives course | joshuaproject |
+| https://joshuaproject.net | **Unreached people groups database** | storyrunners |
+| https://orality.net | International Orality Network (Cloudflare-blocked) | storyrunners |
+| https://www.jesusfilm.org | Jesus Film Project (Cru) | forum-intl |
+| https://www.biblesforchina.org | Bibles for China | forum-intl |
+| https://missionexus.org | Missio Nexus — Great Commission network | spoken |
+| https://www.askamissionary.com | Missionary Q&A directory | missionexus |
+| https://www.rightnowmedia.org | RightNow Media Christian streaming | missionexus |
+
+### Wycliffe Global Alliance member orgs
+
+| URL | Context |
+|---|---|
+| https://wycliffe.org.za | **Wycliffe South Africa — closest to our targets** |
+| https://www.cabtal.org | CABTAL Cameroon |
+| https://www.gillbt.com | GILLBT Ghana |
+| https://www.antba.org | ANTBA Burkina Faso |
+| https://www.btlkenya.org | BTL Kenya |
+| https://nbtt.org.ng | Nigeria Bible Translation Trust |
+| https://onebook.ca | OneBook Canada |
+| https://www.wycliffe.org.uk | Wycliffe UK & Ireland |
+| https://wycliffe.de | Wycliffe Germany |
+| https://wycliffe.ca | Wycliffe Canada |
+| https://wycliffe.org.au | Wycliffe Australia |
+
+### Bible Translation Tooling (newly discovered)
+
+| URL | Context |
+|---|---|
+| https://paratext.org | **Flagship Bible translation desktop software (UBS/SIL)** |
+| https://scriptureforge.org | Collaborative Scripture editor w/ ML drafting |
+| https://software.sil.org/scriptureappbuilder | SIL Scripture App Builder for Android |
+| https://software.sil.org/phonology-assistant | Phonology Assistant |
+| https://software.sil.org/cog | Cog lexicostatistics |
+| https://www.autographamt.com | Autographa MT — machine-assisted drafting |
+| https://semanticdictionary.org | MARBLE biblical-language resources |
+| https://pubassist.paratext.org | Publishing Assistant (Paratext → InDesign) |
+| https://www.digitaltraininglibrary.org | DTL translator training |
+| https://scripts.sil.org | SIL Non-Roman Script Initiative |
+
+### Publishers / Hubs (newly discovered)
+
+| URL | Context |
+|---|---|
+| https://wibilex.de | German academic Bible lexicon |
+| https://wirelex.de | German religious-education lexicon |
+| https://weltbibelhilfe.de | World Bible Aid |
+| https://www.bibelonline.de | German Bible Society retail |
+| https://bibleproject.com | BibleProject animated teaching |
+| https://www.awana.org | Awana children's Scripture-memory |
+| https://www.worldvision.org | World Vision |
+| https://www.compassion.com | Compassion International |
+| https://www.logos.com | Logos Bible Software (Faithlife) |
+| https://www.ethnologue.com | **SIL Ethnologue — canonical language DB** |
+| https://absgift.org | ABS planned-giving |
+
+### 2nd-degree crawl notes
+
+- **Blocked (403/Cloudflare):** progress.bible, biblica.com, lab.eten.bible, orality.net, sim.org
+- **TLS error:** us.lbt.org (apex `lbt.org` works)
+- **Low yield:** seedcompany, twftw, pioneerbible, crossway, gloo, eten.bible homepage, biblionexus, etenlab — partner logos without hrefs
+
+### Highest-impact new lead
+
+**StoryRunners (`storyrunners.org`)** — Cru oral storying ministry. Confirmed downloadable MP3 zips of "The Promise" Bible storyset in:
+
+- **Shona Central** (sna) — direct download zip
+- **Shona Southeast** (likely **ndc** — Ndau) — direct download zip
+- **Ndebele** (likely **nde**)
+- **Chichewa** (**nya**)
+- **Yao** (**yao**)
+- **Shangaan** = Tsonga (**tso**)
+
+Clean narration MP3; 101 completed story sets globally. Best new audio source for our targets discovered this round.
+
+---
+
+## Per-language Bible Translation Status (from corroborating sources)
+
+progress.bible blocked Cloudflare. Status assembled from worldbibles.org, find.bible, bible.com, Joshua Project, Bible Society catalogs.
+
+| ISO | Lang | Status | Latest pub | Speakers | Country |
+|---|---|---|---|---|---|
+| sna | Shona | Full Bible | 1949 (rev. 2005) | ~10.8M | ZW |
+| nde | N. Ndebele (ZW) | Full Bible | 1978 (rev.); TBS NT 2014 | ~2M | ZW |
+| nbl | S. Ndebele (ZA) | Full Bible | 2012 | ~1.1M | ZA |
+| nya | Chichewa/Nyanja | Full Bible | 1922 (rev. 2014) | ~14M | MW/ZM |
+| toi | Tonga (Zambia) | Full Bible | 1963 (rev. 1996) | ~1.5M (~300k ZW) | ZM/ZW |
+| kck | Kalanga | Full Bible | 2008 (BSB) | ~425k | BW/ZW |
+| nmq | Nambya | **Portions only — no NT** | 1961 portions | ~100k | ZW/BW |
+| ven | Venda | Full Bible | 1936 (rev. 1998) | ~1.3M | ZA |
+| tso | Tsonga/Xitsonga | Full Bible | 1989 (rev. 2024) | ~3.7M | ZA/MZ |
+| por | Portuguese | Full + DC | many editions | ~260M | PT/BR/MZ/AO |
+| vmw | Makhuwa | NT (cluster); OT in progress | NT 2015/2017 | ~7M | MZ |
+| seh | Sena | NT + portions; OT in progress | JW NWT 2020s | ~1.6M | MZ/MW/ZW |
+| ngl | Lomwe | NT | dramatized NT (recent) | ~1.5M | MZ/MW |
+| chw | Chuwabo | **Bibleless / very early portions** | Wycliffe project 2013-2015 | ~834k | MZ |
+| ndc | Ndau | Portions / NT in progress | first 1906; modern NT active | ~2.4M | MZ/ZW |
+| tsc | Tswa/Xitshwa | Full Bible | 1972 (rev. 2007) | ~1.5M | MZ |
+| rng | Ronga/Xironga | Full Bible | 2019 (43-yr project) | ~702k | MZ |
+| yao | Yao/Chiyawo | Full Bible | 2014 (BSM) | ~2M | MW/MZ/TZ |
+
+**Key insights:**
+- **17 of 19 have at least an NT.** Only `nmq` (Nambya) and `chw` (Chuwabo) are essentially Bibleless.
+- **Full Bibles available:** sna, nde, nbl, nya, toi, kck, ven, tso, por, tsc, rng, yao = **12 langs**.
+- **NT only:** vmw, seh, ngl
+- **Portions only:** nmq, ndc, chw
+
+**Implication:** Most target langs HAVE text Bibles publicly published — just need to find downloadable USFM/HTML versions for alignment with our 350h audio corpus. `bible.com` YouVersion versions are the most accessible (per-verse JSON via reverse-engineering API).

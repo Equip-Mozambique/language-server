@@ -48,6 +48,7 @@ def transcribe_whisper(audio: str | Path, lang_iso: str) -> str:
     out = pipe(
         {"array": speech, "sampling_rate": 16_000},
         generate_kwargs={"language": lang.whisper_code, "task": "transcribe"},
+        return_timestamps=True,
     )
     return out["text"].strip()
 
@@ -100,6 +101,7 @@ def transcribe_array(samples, sr: int, lang_iso: str) -> str:
         out = pipe(
             {"array": samples, "sampling_rate": sr},
             generate_kwargs={"language": lang.whisper_code, "task": "transcribe"},
+            return_timestamps=True,
         )
         return out["text"].strip()
     if lang.preferred_stt == "mms":
