@@ -8,6 +8,21 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.responses import Response
+from starlette.types import Scope
+
+
+class SPAStaticFiles(StaticFiles):
+    """StaticFiles that falls back to index.html for unknown paths (SPA routes)."""
+
+    async def get_response(self, path: str, scope: Scope) -> Response:
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as e:
+            if e.status_code == 404:
+                return await super().get_response("index.html", scope)
+            raise
 
 
 def _preload() -> None:
@@ -56,4 +71,4 @@ def _frontend_dir() -> Path | None:
 
 _static = _frontend_dir()
 if _static is not None:
-    app.mount("/", StaticFiles(directory=str(_static), html=True), name="frontend")
+    app.mount("/", SPAStaticFiles(directory=str(_static), html=True), name="frontend")
