@@ -49,3 +49,40 @@
     &:first-of-type { border-top: none; }
   }
 }
+
+.readiness-card {
+  flex: 1 1 320px;
+  min-width: 320px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  background: var(--surface);
+
+  .rc-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+
+  .rc-score {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 22px;
+  }
+
+  .rc-score-suffix {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  ul, ol {
+    padding: 0;
+    margin: 0 0 0 18px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+}

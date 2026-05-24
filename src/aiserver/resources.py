@@ -116,7 +116,7 @@ def get_resources(iso: str) -> dict[str, Any]:
     lang = get(iso)
     dbs_grouped = _load_dbs_filtered()
     uploads = corpus.list_uploads(iso)
-    return {
+    bundle = {
         "iso": iso,
         "name": lang.name,
         "country": lang.country,
@@ -134,6 +134,126 @@ def get_resources(iso: str) -> dict[str, Any]:
         "dbp_bibles": _dbp_bibles_for(iso),
         "uploads": uploads,
         "uploads_count": len(uploads),
+        "corpus": _scan_corpus(iso),
+    }
+    # Additive: embed readiness so the SPA gets it in one request.
+    # Imported lazily to avoid circular import (readiness imports resources).
+    try:
+        from . import readiness as _readiness
+        reports = _readiness.readiness_all_from_bundle(iso, bundle)
+        bundle["readiness"] = {axis: r.as_dict() for axis, r in reports.items()}
+        bundle["readiness"]["overall"] = _readiness.overall_score(reports)
+    except Exception:
+        # Never let readiness scoring break the resources endpoint
+        bundle["readiness"] = None
+    return bundle
+
+
+def _scan_corpus(iso: str) -> dict[str, Any]:
+    """Enumerate on-disk downloaded resources for this ISO under data/."""
+    root = Path.home() / "ai-server" / "data"
+    iso_audio = root / "audio" / iso
+    iso_text = root / "text" / iso
+    iso_video = root / "video" / iso
+    iso_pairs = root / "pairs" / iso
+
+    audio_filesets: list[dict[str, Any]] = []
+    storyrunners: dict[str, Any] | None = None
+    scriptureearth: dict[str, Any] | None = None
+    if iso_audio.exists():
+        for sub in sorted(iso_audio.iterdir()):
+            if not sub.is_dir():
+                continue
+            if sub.name == "storyrunners":
+                ext = sub / "extracted"
+                if ext.exists():
+                    mp3s = [p for p in ext.rglob("*.mp3") if "__MACOSX" not in str(p)]
+                    storyrunners = {
+                        "path": str(ext.relative_to(root)),
+                        "file_count": len(mp3s),
+                        "total_bytes": sum(p.stat().st_size for p in mp3s),
+                    }
+                continue
+            if sub.name == "scriptureearth":
+                mp3s = list(sub.rglob("*.mp3"))
+                scriptureearth = {
+                    "path": str(sub.relative_to(root)),
+                    "file_count": len(mp3s),
+                    "total_bytes": sum(p.stat().st_size for p in mp3s),
+                }
+                continue
+            manifest = sub / "manifest.json"
+            if manifest.exists():
+                try:
+                    m = json.loads(manifest.read_text())
+                    audio_files = list(sub.glob("*.mp3")) + list(sub.glob("*.webm"))
+                    total_dur = sum((e.get("duration_s") or 0) for e in m) if isinstance(m, list) else 0
+                    audio_filesets.append({
+                        "fileset_id": sub.name,
+                        "path": str(sub.relative_to(root)),
+                        "chapter_count": len(m) if isinstance(m, list) else 0,
+                        "file_count": len(audio_files),
+                        "total_bytes": sum(p.stat().st_size for p in audio_files),
+                        "total_duration_s": total_dur,
+                        "has_text_in_manifest": any(e.get("text") for e in m) if isinstance(m, list) else False,
+                    })
+                except Exception:
+                    pass
+
+    text_versions: list[dict[str, Any]] = []
+    if iso_text.exists():
+        for sub in sorted(iso_text.iterdir()):
+            if not sub.is_dir():
+                continue
+            nt_manifest = sub / "nt_manifest.json"
+            if nt_manifest.exists():
+                try:
+                    m = json.loads(nt_manifest.read_text())
+                    chapters = m.get("chapters", {})
+                    verse_count = sum(len(v) for v in chapters.values())
+                    text_versions.append({
+                        "version_abbr": sub.name,
+                        "path": str(nt_manifest.relative_to(root)),
+                        "version_id": m.get("version_id"),
+                        "chapter_count": len(chapters),
+                        "verse_count": verse_count,
+                    })
+                except Exception:
+                    pass
+
+    video_files: list[dict[str, Any]] = []
+    if iso_video.exists():
+        for sub in sorted(iso_video.iterdir()):
+            if not sub.is_dir():
+                continue
+            for vf in sorted(sub.glob("*.mp4")):
+                video_files.append({
+                    "source": sub.name,
+                    "name": vf.name,
+                    "path": str(vf.relative_to(root)),
+                    "bytes": vf.stat().st_size,
+                })
+
+    training_pairs: dict[str, Any] | None = None
+    pairs_file = iso_pairs / "pairs.jsonl"
+    if pairs_file.exists():
+        try:
+            with pairs_file.open() as f:
+                lines = sum(1 for _ in f)
+        except Exception:
+            lines = 0
+        training_pairs = {
+            "path": str(pairs_file.relative_to(root)),
+            "pair_count": lines,
+        }
+
+    return {
+        "audio_filesets": audio_filesets,
+        "text_versions": text_versions,
+        "video_files": video_files,
+        "storyrunners": storyrunners,
+        "scriptureearth": scriptureearth,
+        "training_pairs": training_pairs,
     }
 
 

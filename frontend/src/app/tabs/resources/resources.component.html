@@ -159,6 +159,207 @@
           </div>
         </section>
 
+        <!-- 4a. Model readiness (computed from corpus + model coverage) -->
+        @if (b.readiness; as r) {
+          <section id="readiness" class="card">
+            <header class="card-head">
+              <h2><app-icon name="layers"></app-icon> Model readiness</h2>
+              <span class="chip mono">
+                ASR {{ r.asr.score }} · TTS {{ r.tts.score }} · LM {{ r.text.score }} · Overall {{ r.overall }}
+              </span>
+            </header>
+            <div class="card-body row gap-3" style="flex-wrap: wrap; align-items: stretch;">
+              @for (axis of readinessAxes; track axis) {
+                <div class="readiness-card">
+                  <div class="rc-head">
+                    <strong>{{ axisLabel(axis) }}</strong>
+                    <span class="pill"><span class="dot {{ tierTone(r[axis].tier) }}"></span>{{ r[axis].tier }}</span>
+                    <span class="rc-score">{{ r[axis].score }}<span class="rc-score-suffix">/100</span></span>
+                  </div>
+                  <div class="row gap-2" style="flex-wrap: wrap; margin: 6px 0;">
+                    @for (kv of r[axis].breakdown | keyvalue; track kv.key) {
+                      <span class="chip outline mono" style="font-size: 11px;">{{ kv.key }} {{ kv.value }}</span>
+                    }
+                  </div>
+                  @if (r[axis].flags.length > 0) {
+                    <div class="row gap-2" style="flex-wrap: wrap; margin: 6px 0;">
+                      @for (f of r[axis].flags; track f) {
+                        <span class="chip" style="background: var(--warn-bg, #ffe7c2); color: var(--warn-text, #8a4b00); font-size: 11px;">⚠ {{ f }}</span>
+                      }
+                    </div>
+                  }
+                  @if (r[axis].missing_resources.length > 0) {
+                    <div class="text-xs" style="margin-top: 8px;">
+                      <strong>Missing:</strong>
+                      <ul style="margin: 4px 0 4px 18px;">
+                        @for (m of r[axis].missing_resources; track m) {
+                          <li>{{ m }}</li>
+                        }
+                      </ul>
+                    </div>
+                  }
+                  @if (r[axis].recommended_next_actions.length > 0) {
+                    <div class="text-xs" style="margin-top: 6px;">
+                      <strong>Next:</strong>
+                      <ol style="margin: 4px 0 4px 18px;">
+                        @for (a of r[axis].recommended_next_actions; track a) {
+                          <li>{{ a }}</li>
+                        }
+                      </ol>
+                    </div>
+                  }
+                  @if (r[axis].notes.length > 0) {
+                    <div class="text-xs text-muted" style="margin-top: 6px; font-style: italic;">
+                      @for (n of r[axis].notes; track n) {
+                        <div>{{ n }}</div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- 4b. Downloaded corpus (on-disk inventory) -->
+        @if (b.corpus; as c) {
+          <section id="downloaded" class="card">
+            <header class="card-head">
+              <h2><app-icon name="download"></app-icon> Downloaded corpus</h2>
+              <span class="chip mono">
+                {{ c.audio_filesets.length }}A · {{ c.text_versions.length }}T · {{ c.video_files.length }}V
+              </span>
+            </header>
+            <div class="card-body col gap-3">
+
+              <!-- Audio filesets (DBP NT etc) -->
+              @if (c.audio_filesets.length > 0) {
+                <div>
+                  <div class="text-sm" style="font-weight: 500; margin-bottom: 6px;">
+                    <app-icon name="speaker"></app-icon> Audio filesets
+                  </div>
+                  <table class="tbl">
+                    <thead>
+                      <tr>
+                        <th>Fileset</th>
+                        <th class="num">Files</th>
+                        <th class="num">Chapters</th>
+                        <th class="num">Size</th>
+                        <th class="num">Duration</th>
+                        <th>Text?</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (fs of c.audio_filesets; track fs.fileset_id) {
+                        <tr>
+                          <td><span class="chip mono outline">{{ fs.fileset_id }}</span></td>
+                          <td class="num">{{ fs.file_count }}</td>
+                          <td class="num">{{ fs.chapter_count }}</td>
+                          <td class="num">{{ (fs.total_bytes / 1048576) | number:'1.0-0' }} MB</td>
+                          <td class="num">{{ (fs.total_duration_s / 60) | number:'1.0-0' }} min</td>
+                          <td>
+                            @if (fs.has_text_in_manifest) {
+                              <span class="chip accent">paired</span>
+                            } @else {
+                              <span class="chip outline">audio-only</span>
+                            }
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+
+              <!-- Text versions (Bible.com NT) -->
+              @if (c.text_versions.length > 0) {
+                <div>
+                  <div class="text-sm" style="font-weight: 500; margin-bottom: 6px;">
+                    <app-icon name="book"></app-icon> Text versions
+                  </div>
+                  <table class="tbl">
+                    <thead>
+                      <tr>
+                        <th>Version</th>
+                        <th class="num">ID</th>
+                        <th class="num">Chapters</th>
+                        <th class="num">Verses</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (tv of c.text_versions; track tv.version_abbr) {
+                        <tr>
+                          <td><span class="chip mono outline">{{ tv.version_abbr }}</span></td>
+                          <td class="num text-muted">{{ tv.version_id }}</td>
+                          <td class="num">{{ tv.chapter_count }}</td>
+                          <td class="num">{{ tv.verse_count }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+
+              <!-- Video files (Arclight / Jesus Film) -->
+              @if (c.video_files.length > 0) {
+                <div>
+                  <div class="text-sm" style="font-weight: 500; margin-bottom: 6px;">
+                    <app-icon name="play"></app-icon> Video files
+                  </div>
+                  <table class="tbl">
+                    <thead>
+                      <tr>
+                        <th>Source</th>
+                        <th>File</th>
+                        <th class="num">Size</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (vf of c.video_files; track vf.path) {
+                        <tr>
+                          <td><span class="chip mono outline">{{ vf.source }}</span></td>
+                          <td><span class="mono text-sm">{{ vf.name }}</span></td>
+                          <td class="num">{{ (vf.bytes / 1048576) | number:'1.0-0' }} MB</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+
+              <!-- StoryRunners + ScriptureEarth + Training pairs summary chips -->
+              <div class="row gap-2" style="flex-wrap: wrap;">
+                @if (c.storyrunners) {
+                  <span class="chip accent">
+                    StoryRunners: {{ c.storyrunners.file_count }} files,
+                    {{ (c.storyrunners.total_bytes / 1048576) | number:'1.0-0' }} MB
+                  </span>
+                }
+                @if (c.scriptureearth) {
+                  <span class="chip accent">
+                    ScriptureEarth: {{ c.scriptureearth.file_count }} files,
+                    {{ (c.scriptureearth.total_bytes / 1048576) | number:'1.0-0' }} MB
+                  </span>
+                }
+                @if (c.training_pairs) {
+                  <span class="chip accent">
+                    Training pairs: {{ c.training_pairs.pair_count }} (audio + text)
+                  </span>
+                }
+                @if (!c.storyrunners && !c.scriptureearth && !c.training_pairs &&
+                     c.audio_filesets.length === 0 && c.text_versions.length === 0 &&
+                     c.video_files.length === 0) {
+                  <div class="state" style="width: 100%;">
+                    <div class="icon"><app-icon name="download" [size]="20"></app-icon></div>
+                    <h3>Nothing downloaded yet</h3>
+                    <p>No on-disk resources found under data/audio, data/text, data/video, or data/pairs for this language.</p>
+                  </div>
+                }
+              </div>
+            </div>
+          </section>
+        }
+
         <!-- 5. Uploaded corpus -->
         <section id="corpus" class="card">
           <header class="card-head">
@@ -246,6 +447,8 @@
           @if (b.research_md) { <li><a href="#research">Research notes</a></li> }
           <li><a href="#catalog">DBS catalog</a></li>
           <li><a href="#audio">DBP audio</a></li>
+          @if (b.readiness) { <li><a href="#readiness">Model readiness</a></li> }
+          @if (b.corpus) { <li><a href="#downloaded">Downloaded corpus</a></li> }
           <li><a href="#corpus">Uploaded corpus</a></li>
         </ol>
       </aside>

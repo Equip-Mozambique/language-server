@@ -87,6 +87,77 @@ export interface ResourceBundle {
   dbp_bibles: DbpBible[];
   uploads: UploadRow[];
   uploads_count: number;
+  corpus?: CorpusSummary;
+  readiness?: ReadinessBundle | null;
+}
+
+export interface CorpusAudioFileset {
+  fileset_id: string;
+  path: string;
+  chapter_count: number;
+  file_count: number;
+  total_bytes: number;
+  total_duration_s: number;
+  has_text_in_manifest: boolean;
+}
+
+export interface CorpusTextVersion {
+  version_abbr: string;
+  path: string;
+  version_id: number | null;
+  chapter_count: number;
+  verse_count: number;
+}
+
+export interface CorpusVideoFile {
+  source: string;
+  name: string;
+  path: string;
+  bytes: number;
+}
+
+export interface CorpusBlob {
+  path: string;
+  file_count: number;
+  total_bytes: number;
+}
+
+export interface CorpusTrainingPairs {
+  path: string;
+  pair_count: number;
+}
+
+export interface CorpusSummary {
+  audio_filesets: CorpusAudioFileset[];
+  text_versions: CorpusTextVersion[];
+  video_files: CorpusVideoFile[];
+  storyrunners: CorpusBlob | null;
+  scriptureearth: CorpusBlob | null;
+  training_pairs: CorpusTrainingPairs | null;
+}
+
+export type ReadinessTier =
+  | 'bibleless' | 'bootstrap' | 'emerging' | 'adapter' | 'production' | 'mature';
+
+export type ReadinessAxis = 'asr' | 'tts' | 'text';
+
+export interface ReadinessReport {
+  axis: ReadinessAxis;
+  iso: string;
+  score: number;                          // 0-100
+  tier: ReadinessTier;
+  breakdown: Record<string, number>;
+  missing_resources: string[];
+  recommended_next_actions: string[];
+  flags: string[];
+  notes: string[];
+}
+
+export interface ReadinessBundle {
+  asr: ReadinessReport;
+  tts: ReadinessReport;
+  text: ReadinessReport;
+  overall: number;                         // weighted 0-100
 }
 
 export interface WsChunkResponse {

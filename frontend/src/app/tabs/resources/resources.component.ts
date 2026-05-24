@@ -4,7 +4,7 @@ import { MarkdownComponent } from 'ngx-markdown';
 import { IconComponent } from '../../core/icon.component';
 import { ApiService } from '../../core/api.service';
 import { LanguageStateService } from '../../core/language-state.service';
-import { ResourceBundle, UploadRow } from '../../core/models';
+import { ResourceBundle, UploadRow, ReadinessTier } from '../../core/models';
 
 type SortKey = 'id' | 'tt' | 'tv' | 'dt' | 'cn';
 type SortDir = 'asc' | 'desc';
@@ -124,5 +124,19 @@ export class ResourcesComponent {
     if (on) return 'available';
     if (proxy) return 'via proxy';
     return 'missing';
+  }
+
+  tierTone(t: ReadinessTier | string): 'green' | 'amber' | 'red' {
+    if (t === 'mature' || t === 'production') return 'green';
+    if (t === 'adapter' || t === 'emerging') return 'amber';
+    return 'red';
+  }
+
+  readinessAxes: Array<'asr' | 'tts' | 'text'> = ['asr', 'tts', 'text'];
+
+  axisLabel(a: string): string {
+    if (a === 'asr') return 'ASR · speech → text';
+    if (a === 'tts') return 'TTS · text → speech';
+    return 'Text · LM / MT';
   }
 }
