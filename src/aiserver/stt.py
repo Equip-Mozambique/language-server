@@ -78,3 +78,39 @@ def transcribe(audio: str | Path, lang_iso: str) -> str:
             return transcribe_mms(audio, lang_iso)
         case _:
             raise NotImplementedError(f"STT engine '{lang.preferred_stt}' not wired yet")
+
+
+def transcribe_array(samples, sr: int, lang_iso: str) -> str:
+    """Transcribe from an in-memory float32 mono waveform array.
+
+    `samples` must be float32 in [-1, 1]; `sr` should be 16 000 (resampling left
+    to the caller for v1). Avoids the temp-file round-trip used by `transcribe`.
+    """
+    import numpy as np
+
+    lang = get(lang_iso)
+    if sr != 16_000:
+        raise ValueError("transcribe_array currently requires sr=16000")
+    samples = np.asarray(samples, dtype="float32")
+
+    if lang.preferred_stt == "whisper":
+        if lang.whisper_code is None:
+            raise ValueError(f"{lang.name} not supported by Whisper")
+        pipe = _whisper()
+        out = pipe(
+            {"array": samples, "sampling_rate": sr},
+            generate_kwargs={"language": lang.whisper_code, "task": "transcribe"},
+        )
+        return out["text"].strip()
+    if lang.preferred_stt == "mms":
+        if lang.mms_iso is None:
+            raise ValueError(f"{lang.name} not in MMS")
+        processor, model = _mms()
+        processor.tokenizer.set_target_lang(lang.mms_iso)
+        model.load_adapter(lang.mms_iso)
+        inputs = processor(samples, sampling_rate=sr, return_tensors="pt").to(DEVICE)
+        with torch.no_grad():
+            logits = model(**inputs).logits
+        ids = torch.argmax(logits, dim=-1)[0]
+        return processor.decode(ids).strip()
+    raise NotImplementedError(f"STT engine '{lang.preferred_stt}' not wired yet")

@@ -1,16 +1,17 @@
-"""Routes for /transcribe (file POST) and /ws/transcribe (live chunks; TBD)."""
+"""Routes for /transcribe (file POST) and /ws/transcribe (live chunks)."""
 
 from __future__ import annotations
 
+import struct
 import tempfile
 from pathlib import Path
 from typing import Literal
 
-from fastapi import APIRouter, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
 from aiserver import stt, translate
-from aiserver.languages import get
+from aiserver.languages import LANGS, get
 
 
 router = APIRouter()
@@ -78,3 +79,81 @@ async def transcribe_file(
         engine=out["engine"],
         covered=out["covered"],
     )
+
+
+def _pcm_le16_to_float32(pcm: bytes):
+    """Decode signed-16-bit little-endian PCM bytes to float32 in [-1, 1]."""
+    import numpy as np
+
+    if not pcm:
+        return np.zeros(0, dtype="float32")
+    n = len(pcm) // 2
+    samples = struct.unpack(f"<{n}h", pcm[: n * 2])
+    arr = np.asarray(samples, dtype="float32") / 32768.0
+    return arr
+
+
+@router.websocket("/ws/transcribe")
+async def ws_transcribe(ws: WebSocket) -> None:
+    """Receive PCM-int16 chunks at 16 kHz; reply per-chunk transcript + translation."""
+    await ws.accept()
+
+    # Handshake — first message must be JSON with lang + target.
+    try:
+        cfg = await ws.receive_json()
+    except (ValueError, WebSocketDisconnect):
+        await ws.close(code=1003)
+        return
+
+    lang_iso = cfg.get("lang", "")
+    target = cfg.get("target", "en")
+
+    if lang_iso not in LANGS:
+        await ws.send_json({"ok": False, "error": f"unknown lang: {lang_iso}"})
+        await ws.close(code=1008)
+        return
+    if target not in {"en", "pt"}:
+        await ws.send_json({"ok": False, "error": f"invalid target: {target}"})
+        await ws.close(code=1008)
+        return
+
+    await ws.send_json({"ok": True, "lang": lang_iso, "target": target})
+
+    pending_chunk_id: int | None = None
+
+    try:
+        while True:
+            msg = await ws.receive()
+            if msg.get("type") == "websocket.disconnect":
+                break
+            if "text" in msg and msg["text"] is not None:
+                # Optional JSON envelope for the next binary frame.
+                try:
+                    envelope = __import__("json").loads(msg["text"])
+                    pending_chunk_id = envelope.get("chunk_id")
+                except Exception:
+                    pending_chunk_id = None
+                continue
+            if "bytes" in msg and msg["bytes"] is not None:
+                samples = _pcm_le16_to_float32(msg["bytes"])
+                try:
+                    transcript = stt.transcribe_array(samples, 16_000, lang_iso)
+                except Exception as e:
+                    await ws.send_json(
+                        {"chunk_id": pending_chunk_id, "error": f"stt_failed: {e}"}
+                    )
+                    pending_chunk_id = None
+                    continue
+                out = translate.translate_text(transcript, lang_iso, target)
+                await ws.send_json(
+                    {
+                        "chunk_id": pending_chunk_id,
+                        "transcript": transcript,
+                        "translation": out["text"],
+                        "engine": out["engine"],
+                        "covered": out["covered"],
+                    }
+                )
+                pending_chunk_id = None
+    except WebSocketDisconnect:
+        return
