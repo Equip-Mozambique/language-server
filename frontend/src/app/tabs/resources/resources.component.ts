@@ -76,22 +76,25 @@ export class ResourcesComponent {
   });
 
   constructor() {
-    effect(() => {
-      const iso = this.state.selectedIso();
-      if (!iso) return;
-      this.loading.set(true);
-      this.error.set(null);
-      this.api.getResources(iso).subscribe({
-        next: (b) => {
-          this.bundle.set(b);
-          this.loading.set(false);
-        },
-        error: (e) => {
-          this.error.set(e?.error?.detail ?? e.message ?? 'load failed');
-          this.loading.set(false);
-        },
-      });
-    });
+    effect(
+      () => {
+        const iso = this.state.selectedIso();
+        if (!iso) return;
+        this.loading.set(true);
+        this.error.set(null);
+        this.api.getResources(iso).subscribe({
+          next: (b) => {
+            this.bundle.set(b);
+            this.loading.set(false);
+          },
+          error: (e) => {
+            this.error.set(e?.error?.detail ?? e.message ?? 'load failed');
+            this.loading.set(false);
+          },
+        });
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   sortBy(k: SortKey) {
