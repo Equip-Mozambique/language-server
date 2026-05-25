@@ -1,0 +1,10 @@
+{"id":"eval-001","input":"mateus 4","expect_json":true,"expect":{"type":"audio_request","book_id":"MAT","chapter":4,"language":"português"}}
+{"id":"eval-002","input":"matthew 5","expect_json":true,"expect":{"type":"audio_request","book_id":"MAT","chapter":5,"language":"english"}}
+{"id":"eval-003","input":"sl 23:1","expect_json":true,"expect":{"type":"text_request","book_id":"PSA","chapter":23,"verse_start":1,"verse_end":1}}
+{"id":"eval-004","input":"João 3:16","expect_json":true,"expect":{"type":"text_request","book_id":"JHN","chapter":3,"verse_start":16,"verse_end":16}}
+{"id":"eval-005","input":"Bom dia","expect_json":false,"must_contain_any":["Salmo","Jesus","Senhor","Deus"]}
+{"id":"eval-006","input":"Good morning","expect_json":false,"must_contain_any":["Psalm","Jesus","Lord","God"]}
+{"id":"eval-007","input":"quem é você?","expect_json":false,"must_contain_any":["Fonte da Vida","assistente"]}
+{"id":"eval-008","input":"genesis 1","expect_json":true,"expect":{"type":"audio_request","book_id":"GEN","chapter":1}}
+{"id":"eval-009","input":"apocalipse 22","expect_json":true,"expect":{"type":"audio_request","book_id":"REV","chapter":22}}
+{"id":"eval-010","input":"romanos 8.28","expect_json":true,"expect":{"type":"text_request","book_id":"ROM","chapter":8,"verse_start":28,"verse_end":28}}

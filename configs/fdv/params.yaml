@@ -1,0 +1,30 @@
+# Runtime knobs that don't belong in the Modelfile (set on ollama service
+# side or per-request via Open WebUI / API).
+
+ollama_service:
+  # Keep the model warm so first prompt after idle doesn't trigger cold load.
+  OLLAMA_KEEP_ALIVE: "24h"
+  # 1 = single user, minimal VRAM (each parallel slot multiplies KV cache).
+  OLLAMA_NUM_PARALLEL: 1
+  # One loaded model only.
+  OLLAMA_MAX_LOADED_MODELS: 1
+  # Flash attention: ~0.5-1GB VRAM saving, no quality cost.
+  OLLAMA_FLASH_ATTENTION: 1
+  # 8-bit KV cache quantization: ~0.5GB saving, no quality loss.
+  OLLAMA_KV_CACHE_TYPE: "q8_0"
+  OLLAMA_HOST: "0.0.0.0"
+  OLLAMA_ORIGINS: "*"
+
+open_webui:
+  # Single uvicorn worker serializes blocking calls. Bump only if traffic
+  # justifies the memory cost (each worker reloads embedding model).
+  workers: 1  # bump to 2 if 5+ concurrent users
+  default_model: "fdv06-v2:latest"
+  # If staging v3: set to fdv06-v3 and gate behind admin user first.
+
+# Apply ollama service env:
+#   sudo systemctl edit ollama
+#   [Service]
+#   Environment="OLLAMA_KEEP_ALIVE=24h"
+#   Environment="OLLAMA_NUM_PARALLEL=4"
+#   sudo systemctl restart ollama
