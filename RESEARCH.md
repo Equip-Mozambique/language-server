@@ -272,6 +272,68 @@ Translation timeline: NT work 1919–2000; first full Bible reportedly 2009; cur
 
 **Risk / data caveat:** All public audio is religious read-speech. BSB NT recording is BW-Lilima variant — Zim-side TjiKalanga speakers may show register drift. KBTP (Zim project) producing newer text but no aligned audio yet. Tone marking inconsistent across orthographies — affects TTS training. Plan eval set with minimal-pair tone contrasts.
 
+## External Service Option: SIL Alpha2 (added 2026-05-25)
+
+**What it is.** Alpha2 is SIL Global's hosted AI translation + TTS service, aimed at non-scripture text and audio in low-resource languages. It builds on **SIL Serval** (open-source REST API around NLLB-200 + fine-tuning) and extends with TTS and an end-user UI/API. Positioned for education, development, trauma-healing, anti-trafficking — i.e. exactly the mission space Equip Mozambique operates in.
+
+**Why it matters here.** Three of our hardest problems for the Bantu fleet are (a) collecting parallel data for MT, (b) covering languages with no public MMS-TTS adapter, (c) staying license-clean for a non-commercial mission deployment. Alpha2 plausibly closes all three for languages SIL has already touched via Bible-translation work.
+
+**Coverage claim.**
+- **200+ languages** available out-of-the-box via website + API
+- **1,200+ (also cited as 1,400+) languages** available via fine-tuned models on request, drawing on SIL's internal multilingual parallel data
+- African Bantu coverage is **not publicly enumerated**. The Alpha2 marketing page does not list our 18 targets by name (Swahili is the only African lang shown in screenshots). Given SIL/Wycliffe has parallel Bible data for essentially all of our 18, **expect on-request coverage for most, but verify by contact**.
+
+**Architecture.** Per the Serval docs:
+- MT backend: NLLB-200 (Meta, 200 langs) with fine-tuning support for new minority langs
+- Also supports SMT with incremental learning (Bible-translation workflow)
+- TTS backend: not publicly specified on the project page; likely MMS-TTS / VITS-family per industry standard, but unconfirmed
+- API: REST, request-based access, no public auth flow documented (contact form gating)
+
+**Pricing (2026-05).**
+
+| Tier | Languages | Cost — first 1M words | Cost — after |
+|---|---|---|---|
+| Professional | 200 out-of-box | $0.002/word | $0.001/word |
+| Custom | 1,400+ via FT on request | $0.01/word | $0.005/word |
+
+- **TTS:** $0.14–$1.14 per minute (price varies by language tier)
+- **Free monthly:** 5,000 words MT + 5 minutes TTS
+- **Licensing mixed:** "majority" of models commercial-OK; some non-commercial-only. Per-language license disclosure needed before deployment.
+
+**Comparison to our build-from-scratch plan.**
+
+| Capability | In-house plan | Alpha2 alternative |
+|---|---|---|
+| MT to/from Bantu targets | Fine-tune `facebook/nllb-200-1.3B` on our NT parallel corpus + eBible siblings; ~1–2 days per language | Hit Alpha2 API; pay-per-word; no GPU spend; no FT lab effort |
+| TTS for langs without `mms-tts-<iso>` | IMS Toucan baseline + FT on collected studio audio | Hit Alpha2 TTS endpoint; per-minute price |
+| TTS for langs with `mms-tts-<iso>` | Use MMS-TTS directly (already CC-BY-NC, free, on-server) | Redundant — keep MMS-TTS |
+| ASR | MMS-1B-all + adapter / Whisper FT — **own stack** | **Alpha2 does not provide ASR** — STT not in scope |
+| Conversational/code-switched register | Need own field data + FT regardless | Same — Alpha2 trained on Bible-domain SIL data, same domain bias |
+| Self-hosting / offline | Yes (the whole point of ai-server) | No — Alpha2 is hosted, requires network |
+| Privacy of source text | Local | Sent to SIL infra |
+
+**Where Alpha2 fits the FDV / ai-server roadmap.**
+- ✅ **Quick baseline MT** for any new target lang before we invest GPU days fine-tuning NLLB ourselves — cheap upper-bound check on quality
+- ✅ **Stop-gap TTS** for `nde`, `nbl`, `kck`, `nmq`, `chw`, `tsc`, `toi`, `ven` where MMS-TTS has no checkpoint
+- ✅ **Reference output to compare our FT against** during evaluation
+- ❌ **Not a replacement for own ASR stack** — Alpha2 doesn't do speech-to-text
+- ❌ **Not for offline / on-device** — phone-deployment story still needs in-house distillation
+- ⚠ **Verify per-lang license** before any production deployment
+
+**Action items.**
+1. Email ai@sil.org / submit contact form: request confirmed language list for our 18 targets (sna, nde, nbl, nya, toi, kck, nmq, ven, tso, por, vmw, seh, ngl, chw, ndc, tsc, rng, yao). Ask for per-lang license tag (commercial-OK vs NC-only).
+2. Burn the 5,000-word/5-min free monthly allocation on Shona + Sena MT/TTS samples to benchmark against our MMS-TTS / Bible.is baselines.
+3. Document Alpha2 endpoint + auth in `docs/` once access granted, so FDV chatbot can optionally route through it as fallback.
+4. Watch SIL Serval GitHub (`sillsdev/serval`) — Apache-licensed, could self-host the MT half if needed.
+
+**Related SIL projects worth a parallel look** (from [ai.sil.org/projects](https://ai.sil.org/projects)):
+- **AERO** — AI for oral language communities; potential collaboration on ASR for non-written langs
+- **Faithbridge** — chatbot over Bible-translation resources; overlap with FDV chatbot scope
+- **FLExTrans** — MT for related-lang pairs (e.g. Shona ↔ Ndau); architecturally aligned with our proxy-language plan
+- **Serval** — open-source MT REST API (Apache-2.0) — self-hostable on ai-server if API access via Alpha2 isn't viable
+
+---
+
 ## License Caveat (RESOLVED 2026-05-24)
 
 **This is a non-commercial Equip Mozambique (NGO) project.** See `CLAUDE.md`.
@@ -337,3 +399,7 @@ The "commercial fallback" plan (w2v-BERT-from-scratch, VITS-from-scratch) is
 - [GRN Kalanga: Jawunda (#26496)](https://globalrecordings.net/en/language/26496)
 - [GRN Kalanga: Lembethu (#26498)](https://globalrecordings.net/en/language/26498)
 - [Mmegi — OT Kalanga Bible in progress](https://www.mmegi.bw/artculture-review/old-testament-kalanga-bible-on-way/news)
+- [SIL Alpha2 project page](https://ai.sil.org/projects/alpha2)
+- [SIL AI & NLP projects index](https://ai.sil.org/projects)
+- [SIL Serval — open-source REST API for NLP](https://ai.sil.org/projects/serval) · [sillsdev/serval (GitHub, Apache-2.0)](https://github.com/sillsdev/serval)
+- [SIL Global AI March 2025 offerings (Alpha2 chatbot integration note)](https://www.internationalmediaservices.org/imnarchives/march-2025-offerings-from-sil-global-ai)

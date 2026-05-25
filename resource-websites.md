@@ -550,3 +550,40 @@ alternative — speaker counts + classification.
 2. Download ScriptureEarth Makonde NT audio (highest signal-to-noise paired audio)
 3. yt-dlp Chichewa Lumo playlists for paired Gospel video + English script
 4. Drop Ethnologue from active scraping
+
+---
+
+## Shona-specific deep-research (2026-05-24)
+
+Targeted probe for additional sna sources beyond Bible-only. Top 5 ranked by impact-per-hour:
+
+| # | URL | Type | Adds | License |
+|---|---|---|---|---|
+| 1 | https://huggingface.co/datasets/DigitalUmuganda/AfriVoice | Audio | ~100h transcribed multi-speaker Shona | CC-BY-4.0 |
+| 2 | https://huggingface.co/datasets/allenai/MADLAD-400 | Text | ~31.6M Shona tokens (multi-domain) | ODC-BY |
+| 3 | https://huggingface.co/google/WaxalNLP | Audio | ~65-80h Shona ASR w/ speaker IDs | CC-BY-SA-4.0 |
+| 4 | https://www.voashona.com / YouTube channel `VOAShona` | Audio | 50-300h news/conversation (yt-dlp) | US Gov / PD-equivalent |
+| 5 | https://dumps.wikimedia.org/snwiki/latest/ | Text | ~11k articles, 3-5M tokens | CC-BY-SA |
+
+### Other discovered Shona sources
+
+| URL | Adds |
+|---|---|
+| https://ebible.org/Scriptures/snabib_usfm.zip (or variants) | eBible Biblica SNABIB — full OT+NT, CC-BY-SA-4.0 |
+| https://arxiv.org/abs/2509.14249 (Masoka 2025) + GitHub repo | Shona Slang dataset — SN-EN code-mix social media, CC0 |
+| https://corpora.uni-leipzig.de/en?corpusId=sna-zw_web_2016 | Leipzig Web Corpus — 77,578 sentences |
+| https://www.kwayedza.co.zw | Shona-language newspaper (Zimpapers) — scrape via aiserver.scrape |
+| https://www.pindula.co.zw | Zimbabwe news/wiki w/ Shona content |
+
+### Confirmed dead ends for Shona
+
+- **commonvoice.mozilla.org** — Shona NOT in v17-v25
+- **repo.sadilar.org (NCHLT, Lwazi, DSFSI Next-Voices)** — ZA langs only
+- **AfriSpeech-200** — accented English, not Shona language
+- **bbc.com / dw.com** — no Shona service
+- **tatoeba.org** — only 48 Shona sentences
+- **CC-100 / OSCAR-23.01** — Shona not in supported langs
+
+### Top-5 expected delta
+
+5× transcribed audio · 30× speakers · 40× tokens · breaks Bible-domain bias.

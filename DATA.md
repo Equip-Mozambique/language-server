@@ -89,3 +89,53 @@ everything.
 - NCHLT raw ≈ ~40 GB total
 - DSFSI Next-Voices ≈ ~100 GB (48kHz wav in parquet)
 - Total Phase 1-3 ≈ ~200 GB → fits comfortably
+
+---
+
+## Shona Phase-2 Corpus (2026-05-24 deep research)
+
+Beyond Bible-only sources. Top 5 additions queued for download, ordered by impact:
+
+| # | Source | Adds | License | URL |
+|---|---|---|---|---|
+| 1 | DigitalUmuganda **AfriVoice** Shona slice | ~100h **transcribed multi-speaker** audio | CC-BY-4.0 | https://huggingface.co/datasets/DigitalUmuganda/AfriVoice |
+| 2 | **MADLAD-400** sn clean | ~31.6M tokens multi-domain text (30× Leipzig, 10× NT) | ODC-BY | https://huggingface.co/datasets/allenai/MADLAD-400 |
+| 3 | **WAXAL** `google/WaxalNLP` `sna_asr` | ~65-80h transcribed multi-speaker (speaker IDs incl.) | CC-BY-SA-4.0 | https://huggingface.co/google/WaxalNLP |
+| 4 | **VOA Zimbabwe (Studio 7)** YouTube + SoundCloud | 50-300h news/conversation audio (yt-dlp + pseudo-label) | US Gov / PD-equivalent | https://www.voashona.com |
+| 5 | **Wikipedia Shona dump** `snwiki-latest` | ~3-5M tokens native journalism (~11k articles) | CC-BY-SA | https://dumps.wikimedia.org/snwiki/latest/ |
+
+### Other newly-found Shona sources
+
+| Source | Adds | License |
+|---|---|---|
+| **eBible Biblica SNABIB** | Full OT+NT Shona Bible (3.4× more text + OT genre diversity vs current NT-only SUB1949) | CC-BY-SA-4.0 |
+| **Shona Slang dataset** (Masoka 2025, arXiv 2509.14249) | Annotated SN-EN code-mix social media | CC0 |
+| **Glot500-c / Leipzig sna-zw_web_2016** | 77,578 pre-aligned sentences, 1.13M tokens | mixed |
+| **Kwayedza, Herald, NewsDay** | Shona-language journalism via `aiserver.scrape` | terms-of-use vary |
+
+### Expected delta if Top-5 pulled
+
+- **5× more transcribed audio** (~245h vs ~50h current)
+- **30× more speakers** (multi-speaker breaks single-reader Bible bias — the project's #1 risk per `docs/training-models-for-low-resource-languages.md` §5)
+- **40× more text tokens** (~40M vs ~1M current)
+- **First meaningful break of Bible-domain bias**
+
+### Confirmed dead ends (don't pursue)
+
+| Source | Why skip |
+|---|---|
+| Common Voice (Mozilla) | Shona NOT in any release through v25 |
+| DSFSI ZA-African-Next-Voices | South African langs only, zero Shona |
+| NCHLT / SADILaR / Lwazi | South African langs only |
+| AfriSpeech-200 | Accented English, not Shona language audio |
+| BBC / DW | Neither operates a Shona service |
+| Tatoeba | 48 Shona sentences total |
+| TED Shona | Doesn't exist |
+| CC-100 | Shona not in the 100 langs |
+| ALRI/ALLEX (UZ) | Email-request only; not pullable via scrape |
+
+### Download script
+
+`scripts/shona_pull.py` — sub-commands `afrivoice`, `madlad`, `waxal`, `wikipedia`, `ebible`, `all`. Outputs land under `data/audio/sna/<source>/` or `data/text/sna/<source>/`. All idempotent (skip if manifest exists).
+
+VOA Zimbabwe yt-dlp scraper deferred to separate script + nightly cron (`scripts/voa_shona.py`, not yet built).
