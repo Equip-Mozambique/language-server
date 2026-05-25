@@ -2,6 +2,12 @@
 
 Remote GPU box for running LLMs / audio AI workloads.
 
+> **Sibling project: Fonte da Vida chatbot** — production WhatsApp Bible-audio
+> bot served from this same box. Lives in its own repo:
+> https://github.com/Equip-Mozambique/fonte-chatbot
+> Server checkout: `~/fonte-chatbot/` (auto-pulled every 2 min via cron).
+> This repo (`ai-server`) is the **MMS-ASR / TTS trainer** workspace only.
+
 ## Project Use
 
 **NON-COMMERCIAL PROJECT.** Operated by Equip Mozambique (NGO). All work here —

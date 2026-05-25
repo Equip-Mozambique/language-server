@@ -44,14 +44,6 @@ ft = [
     "jiwer>=3.0",
     "tensorboard>=2.18",
 ]
-fdv = [
-    "unsloth>=2024.10",
-    "trl>=0.11",
-    "peft>=0.13",
-    "bitsandbytes>=0.44",
-    "datasets>=3.0",
-]
-
 [project.scripts]
 aisrv = "aiserver.cli:app"
 
